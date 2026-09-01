@@ -229,3 +229,21 @@ describe('allocate', () => {
     }
   })
 })
+
+describe('money guards its own invariants', () => {
+  it('parses a signed zero as plain zero', () => {
+    // -0 formats and serialises as 0 but is not Object.is-equal to it, which
+    // makes downstream equality checks behave differently for the same money.
+    expect(Object.is(parseAmountToCents('-0.00'), 0)).toBe(true)
+    expect(Object.is(parseAmountToCents('-0'), 0)).toBe(true)
+  })
+
+  it('rejects a fractional weight rather than floating the remainder maths', () => {
+    expect(() =>
+      allocate(100, [
+        { memberId: 'a', weight: 0.5 },
+        { memberId: 'b', weight: 0.25 },
+      ]),
+    ).toThrow(/whole number/)
+  })
+})

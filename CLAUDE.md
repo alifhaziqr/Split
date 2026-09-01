@@ -42,7 +42,9 @@ over example-by-example assertions.
 - **M0 done** — scaffold, git, TypeScript strict, Vitest.
 - **M1 done** — `core/money.ts` (parse, format, `allocate`) and `core/split.ts` (four modes),
   written test-first. 54 tests.
-- **Next: M2** — `core/settle.ts`: balances that sum to zero, then debt simplification.
+- **M2 done** — `core/settle.ts`: `computeBalances` and `simplifyDebts`, test-first, then a
+  `/code-review` pass whose findings were fixed test-first too. 79 tests.
+- **Next: M3** — Prisma schema, migration, `server/db` repository functions.
 
 ## Conventions settled in M1
 
@@ -53,3 +55,15 @@ float back on the path to a stored share.
 `allocate(totalCents, weights)` in `money.ts` is the single place the largest-remainder rule
 lives. EQUAL, PERCENT and SHARES are all weighted allocations that delegate to it; only EXACT
 bypasses it, because the caller supplies the cents and we merely verify they sum.
+
+## Conventions settled in M2
+
+`simplifyDebts` is a **greedy heuristic, not a minimum**. It re-selects the largest creditor
+and largest debtor after *every* payment — sorting once and walking the lists is a different,
+worse algorithm that costs an avoidable extra payment in ~7% of groups. It guarantees at most
+`n-1` payments and that nobody both pays and receives; the true minimum is NP-hard and not
+worth chasing.
+
+**Core functions validate their own inputs.** `ExpenseRecord` arrives from the database, not
+from `splitAmount`, so `computeBalances` re-checks integer cents and the shares-sum itself.
+Core is where the money rules are enforced, not merely assumed.

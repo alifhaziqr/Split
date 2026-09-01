@@ -37,7 +37,8 @@ export function parseAmountToCents(input: string): number {
   const cents = Number(units) * 100 + Number(fraction.padEnd(2, '0'))
 
   assertIntegerCents(cents, 'amount')
-  return negative ? -cents : cents
+  // `negative && cents === 0` would give -0, which is not Object.is-equal to 0.
+  return negative && cents !== 0 ? -cents : cents
 }
 
 /** One participant's claim on an amount. Weight units are arbitrary and relative. */
@@ -75,7 +76,12 @@ export function allocate(
     }
     seen.add(memberId)
 
-    if (!Number.isFinite(weight) || weight < 0) {
+    // Integer weights keep `totalCents * weight` an exact integer numerator,
+    // which is what the largest-remainder proof below depends on.
+    if (!Number.isSafeInteger(weight)) {
+      throw new Error(`Allocation weight must be a whole number, got ${weight} for ${memberId}`)
+    }
+    if (weight < 0) {
       throw new Error(`Allocation weight must be zero or positive, got ${weight} for ${memberId}`)
     }
     totalWeight += weight
