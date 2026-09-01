@@ -1,0 +1,69 @@
+// Data model for Split. Money is always Int cents — see CLAUDE.md.
+// Shares are materialised at write time by core/split.ts, so historical
+// expenses never shift when the split rules change; reads are trivial.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+// Connection URL lives in prisma.config.ts (Prisma 7 moved it out of the
+// schema); PrismaClient itself connects via the better-sqlite3 adapter.
+datasource db {
+  provider = "sqlite"
+}
+
+model Group {
+  id        String    @id @default(cuid())
+  name      String
+  currency  String
+  createdAt DateTime  @default(now())
+  members   Member[]
+  expenses  Expense[]
+}
+
+model Member {
+  id       String         @id @default(cuid())
+  groupId  String
+  name     String
+  group    Group          @relation(fields: [groupId], references: [id])
+  expenses Expense[]      @relation("PaidBy")
+  shares   ExpenseShare[]
+
+  @@unique([groupId, name])
+}
+
+model Expense {
+  id             String         @id @default(cuid())
+  groupId        String
+  description    String
+  amountCents    Int
+  paidByMemberId String
+  date           DateTime
+  splitMode      SplitMode
+  createdAt      DateTime       @default(now())
+  group          Group          @relation(fields: [groupId], references: [id])
+  paidBy         Member         @relation("PaidBy", fields: [paidByMemberId], references: [id])
+  shares         ExpenseShare[]
+}
+
+// One member's materialised share of one expense. sum(shareCents) for an
+// expense must equal that expense's amountCents — enforced in application
+// code (core/settle.ts), not by the database.
+model ExpenseShare {
+  id         String  @id @default(cuid())
+  expenseId  String
+  memberId   String
+  shareCents Int
+  expense    Expense @relation(fields: [expenseId], references: [id])
+  member     Member  @relation(fields: [memberId], references: [id])
+
+  @@unique([expenseId, memberId])
+}
+
+enum SplitMode {
+  EQUAL
+  EXACT
+  PERCENT
+  SHARES
+}
