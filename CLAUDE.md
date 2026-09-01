@@ -40,4 +40,16 @@ over example-by-example assertions.
 ## Status
 
 - **M0 done** — scaffold, git, TypeScript strict, Vitest.
-- **Next: M1** — `core/money.ts` and `core/split.ts`, test-first.
+- **M1 done** — `core/money.ts` (parse, format, `allocate`) and `core/split.ts` (four modes),
+  written test-first. 54 tests.
+- **Next: M2** — `core/settle.ts`: balances that sum to zero, then debt simplification.
+
+## Conventions settled in M1
+
+Percentages are **integer basis points** (`percentBp`, summing to 10000), not float percents —
+33.33% is 3333. Same reason as cents: a percentage that cannot be represented exactly puts a
+float back on the path to a stored share.
+
+`allocate(totalCents, weights)` in `money.ts` is the single place the largest-remainder rule
+lives. EQUAL, PERCENT and SHARES are all weighted allocations that delegate to it; only EXACT
+bypasses it, because the caller supplies the cents and we merely verify they sum.
