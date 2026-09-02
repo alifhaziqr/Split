@@ -5,7 +5,11 @@
  * Two invariants carry the whole module:
  *   - balances always sum to zero (money is only ever moved, never created)
  *   - applying every transfer leaves all balances at zero
- * A violation of either means a bug upstream, so both are checked, not assumed.
+ * The first is checked at runtime, because nothing upstream guarantees it —
+ * computeBalances re-verifies each expense's shares sum to its amount, and
+ * simplifyDebts rejects an input whose balances don't sum to zero. The
+ * second holds by construction of the greedy loop below and is asserted
+ * only in tests, over many random groups (tests/core/settle.test.ts).
  */
 
 /** An expense with its shares already materialised — see CLAUDE.md on write-time splits. */

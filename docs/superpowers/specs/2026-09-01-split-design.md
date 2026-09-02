@@ -2,6 +2,13 @@
 
 *Written 2026-09-01, from a brainstorming pass. Committed before implementation began.*
 
+*Errata (2026-09-02, after M1-M3): "shortest"/"minimal" below describes intent, not the
+settled algorithm — `simplifyDebts` is a greedy heuristic bounded by n-1 payments, not a
+proven minimum (see the Core algorithm section below, and CLAUDE.md). `splitAmount`'s real
+signature is `splitAmount(amountCents, input: SplitInput)`, with `mode` and `participants`
+fused into one discriminated union. This document is left otherwise unchanged as the
+historical record it was committed as.*
+
 ## Problem
 
 Groups of people share costs unevenly. Working out who owes whom by hand is tedious and

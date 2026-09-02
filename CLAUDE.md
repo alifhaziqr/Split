@@ -1,17 +1,24 @@
 # Split
 
 Expense-sharing app (Splitwise-lite). Groups, members, expenses with four split modes,
-and a settle-up view that computes the minimal set of payments to square everyone up.
+and a settle-up view that reduces who-owes-whom to a short list of payments (greedy,
+at most n-1 — see Conventions settled in M2, not a proven minimum).
 
 This is a learning project. Good practice matters more than speed.
 
 ## Commands
 
+First run only:
+
+    cp .env.example .env   # DATABASE_URL for a persistent local dev.db;
+                            # `npm install` works without this too — see M3
+
     npm test           # vitest, single run
     npm run test:watch # vitest, watch mode
     npm run typecheck  # tsc --noEmit
 
-Node 24 required (see `.nvmrc`). If versions look wrong, run `nvm use`.
+`npm install` runs `prisma generate` via `postinstall` — required before `src/generated/prisma`
+exists at all. Node 24 required (see `.nvmrc`). If versions look wrong, run `nvm use`.
 
 ## Architecture — the dependency rule
 
@@ -41,13 +48,21 @@ over example-by-example assertions.
 
 - **M0 done** — scaffold, git, TypeScript strict, Vitest.
 - **M1 done** — `core/money.ts` (parse, format, `allocate`) and `core/split.ts` (four modes),
-  written test-first. 54 tests.
+  written test-first. 54 tests. The design doc's pre-implementation sketch,
+  `splitAmount(amountCents, mode, participants)`, settled as the two-argument
+  `splitAmount(amountCents, input: SplitInput)` — mode and participants fused into one
+  discriminated union, so an illegal mode/participant pairing is unrepresentable.
 - **M2 done** — `core/settle.ts`: `computeBalances` and `simplifyDebts`, test-first, then a
   `/code-review` pass whose findings were fixed test-first too. 79 tests.
 - **M3 done** — Prisma schema + migration, `server/db` repository functions
   (`groups`, `members`, `expenses`), test-first against a real migrated SQLite file, then a
   `/code-review` pass whose findings were verified and fixed test-first too. 100 tests.
-- **Next: M4** — Hono REST API, zod validation, error handling, API tests.
+- **Next: M4** — Hono REST API, zod validation, error handling, API tests. Also owns the
+  storage-to-core adapter that maps `GroupDetails` (`server/db/groups.ts`) to
+  `ExpenseRecord[]` for `computeBalances`/`simplifyDebts` — `core/settle.ts` currently has no
+  production caller, only its own tests — and the design doc's end-to-end verification (a
+  seeded group of four, five mixed-mode expenses, settle-up transfers applied by hand and
+  confirmed to zero every balance).
 
 ## Conventions settled in M1
 
@@ -68,8 +83,13 @@ worse algorithm that costs an avoidable extra payment in ~7% of groups. It guara
 worth chasing.
 
 **Core functions validate their own inputs.** `ExpenseRecord` arrives from the database, not
-from `splitAmount`, so `computeBalances` re-checks integer cents and the shares-sum itself.
-Core is where the money rules are enforced, not merely assumed.
+from `splitAmount`, so `computeBalances` re-checks integer cents, a non-negative amount, and
+the shares-sum itself, rather than assuming storage already enforced them. It does *not*
+currently re-check that each individual `shareCents` is non-negative — the write path
+enforces that in four places (`split.ts`, `allocate`) and the schema does not enforce it at
+all, so a hand-edited or corrupted row could still slip a negative share past this boundary.
+Narrow gap, not a live bug; worth a guard if `computeBalances` ever gains other untrusted
+callers.
 
 ## Conventions settled in M3
 
@@ -109,8 +129,22 @@ second unique constraint later would otherwise get mislabeled.
 
 **`prisma generate` must run on install**, not just once by hand. `src/generated/prisma` is
 gitignored, so a fresh clone has nothing until `postinstall` in `package.json` runs it —
-found by literally deleting the directory and running `npm test` to confirm CLAUDE.md's own
-documented Commands actually work from a clean checkout.
+found by deleting the directory and running `npm test`. That first check left the developer's
+own `.env` in place, though, and `.env` is *also* gitignored (only `.env.example` is
+committed) — so it didn't actually prove a from-scratch clone works. A true clean clone
+(`git archive HEAD` into an empty directory) failed: `prisma.config.ts` read
+`env('DATABASE_URL')`, which throws when unset, so `postinstall` itself failed before
+`src/generated` could be produced. Fixed by giving `prisma.config.ts` a
+`process.env.DATABASE_URL ?? 'file:./dev.db'` fallback — dotenv never overwrites an
+already-set variable, so an explicit `DATABASE_URL` (tests pass their own) still wins.
+Verified against a real clean clone with no `.env` present: `npm install && npm test` is
+green.
+
+**The DB suite's cost is real and now budgeted for.** Each of the three
+`tests/server/db/*.test.ts` files spawns a real `prisma migrate deploy` subprocess in
+`beforeAll` — multiple seconds each, three times per run. Vitest's 10s default `hookTimeout`
+is tight enough to fail all three suites at once on a loaded machine; `vitest.config.ts` sets
+`hookTimeout: 60_000` to give the migration room.
 
 **A `.rejects.toThrow(SomeClass)` test can pass for the wrong reason.** If `SomeClass` isn't
 actually exported yet, the import silently resolves to `undefined` under Vitest's transform,
