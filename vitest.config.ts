@@ -76,7 +76,7 @@ export default defineConfig({
           // No project-wide hookTimeout override: almost nothing here
           // spawns a subprocess, so vitest's 10s default stays the right
           // budget and a slow web test is a bug worth failing on. Two files
-          // ARE real exceptions — tests/web/api/contractLive.test.ts and
+          // ARE real exceptions — tests/web/net/contractLive.test.ts and
           // tests/web/integration/addExpenseFlow.test.tsx drive the real
           // Hono app against a real migrated temp database (see testDb.ts),
           // same as the five node-project files that motivated the setting

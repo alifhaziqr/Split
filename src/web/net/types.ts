@@ -29,7 +29,7 @@ export interface WireExpense {
   readonly amountCents: number
   readonly paidByMemberId: string
   readonly date: string
-  readonly splitMode: string
+  readonly splitMode: 'EQUAL' | 'EXACT' | 'PERCENT' | 'SHARES'
   readonly createdAt: string
   readonly shares: readonly WireExpenseShare[]
 }

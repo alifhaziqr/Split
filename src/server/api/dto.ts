@@ -1,4 +1,5 @@
 import type { Expense, ExpenseShare, Group, Member } from '../../generated/prisma/client.js'
+import type { SplitMode } from '../../core/split.js'
 import type { GroupDetails } from '../db/groups.js'
 
 export interface MemberDto {
@@ -17,7 +18,7 @@ export interface ExpenseDto {
   readonly amountCents: number
   readonly paidByMemberId: string
   readonly date: string
-  readonly splitMode: string
+  readonly splitMode: SplitMode
   readonly createdAt: string
   readonly shares: readonly ExpenseShareDto[]
 }

@@ -2,6 +2,7 @@ import { splitAmount } from '../../core/split.js'
 import type { SplitInput } from '../../core/split.js'
 import { Prisma } from '../../generated/prisma/client.js'
 import type { Expense, ExpenseShare, PrismaClient } from '../../generated/prisma/client.js'
+import { foreignKeyViolationKind } from './prismaErrors.js'
 
 export interface CreateExpenseInput {
   readonly groupId: string
@@ -30,6 +31,25 @@ export class ExpenseNotFoundError extends Error {
   }
 }
 
+/** Returns the first of `memberIds` not currently in `groupId`, or null if all are. */
+async function findMissingMemberId(
+  db: PrismaClient,
+  groupId: string,
+  memberIds: ReadonlySet<string>,
+): Promise<string | null> {
+  const membersInGroup = await db.member.findMany({
+    where: { id: { in: [...memberIds] }, groupId },
+    select: { id: true },
+  })
+  const foundIds = new Set(membersInGroup.map((member) => member.id))
+  for (const memberId of memberIds) {
+    if (!foundIds.has(memberId)) {
+      return memberId
+    }
+  }
+  return null
+}
+
 /**
  * Computes shares with core/split.ts *before* touching the database, so an
  * invalid split (wrong percentages, mismatched exact shares) throws with
@@ -43,33 +63,43 @@ export class ExpenseNotFoundError extends Error {
  */
 export async function createExpense(db: PrismaClient, input: CreateExpenseInput): Promise<ExpenseWithShares> {
   const shares = splitAmount(input.amountCents, input.split)
-
   const memberIds = new Set([input.paidByMemberId, ...shares.keys()])
-  const membersInGroup = await db.member.findMany({
-    where: { id: { in: [...memberIds] }, groupId: input.groupId },
-    select: { id: true },
-  })
-  const foundIds = new Set(membersInGroup.map((member) => member.id))
-  for (const memberId of memberIds) {
-    if (!foundIds.has(memberId)) {
-      throw new MemberNotInGroupError(memberId, input.groupId)
-    }
+
+  const missingMemberId = await findMissingMemberId(db, input.groupId, memberIds)
+  if (missingMemberId !== null) {
+    throw new MemberNotInGroupError(missingMemberId, input.groupId)
   }
 
-  return db.expense.create({
-    data: {
-      groupId: input.groupId,
-      description: input.description,
-      amountCents: input.amountCents,
-      paidByMemberId: input.paidByMemberId,
-      date: input.date,
-      splitMode: input.split.mode,
-      shares: {
-        create: [...shares].map(([memberId, shareCents]) => ({ memberId, shareCents })),
+  try {
+    return await db.expense.create({
+      data: {
+        groupId: input.groupId,
+        description: input.description,
+        amountCents: input.amountCents,
+        paidByMemberId: input.paidByMemberId,
+        date: input.date,
+        splitMode: input.split.mode,
+        shares: {
+          create: [...shares].map(([memberId, shareCents]) => ({ memberId, shareCents })),
+        },
       },
-    },
-    include: { shares: true },
-  })
+      include: { shares: true },
+    })
+  } catch (error) {
+    // The membership check above can't close a race where a member is
+    // deleted between that check and this insert — SQLite reports it as a
+    // generic P2003, which foreignKeyViolationKind disambiguates from a
+    // RESTRICT-delete trigger. Re-check to name the same member the
+    // pre-check would have caught, so the client still sees a 422
+    // MemberNotInGroupError instead of an unmapped 500.
+    if (foreignKeyViolationKind(error) === 'missing-reference') {
+      const raceMemberId = await findMissingMemberId(db, input.groupId, memberIds)
+      if (raceMemberId !== null) {
+        throw new MemberNotInGroupError(raceMemberId, input.groupId)
+      }
+    }
+    throw error
+  }
 }
 
 /**

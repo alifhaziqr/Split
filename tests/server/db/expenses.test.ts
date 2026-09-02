@@ -1,8 +1,13 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createGroup } from '../../../src/server/db/groups.js'
 import { addMember } from '../../../src/server/db/members.js'
-import { createExpense, deleteExpense, ExpenseNotFoundError } from '../../../src/server/db/expenses.js'
+import {
+  createExpense,
+  deleteExpense,
+  ExpenseNotFoundError,
+  MemberNotInGroupError,
+} from '../../../src/server/db/expenses.js'
 import { createTestDatabase, resetDb } from './testDb.js'
 import type { TestDatabase } from './testDb.js'
 
@@ -247,5 +252,48 @@ describe('createExpense group membership', () => {
     ).rejects.toThrow(/does not belong to group|not a member/i)
 
     expect(await ctx.db.expense.count()).toBe(0)
+  })
+
+  it('reports a member deleted between the membership check and the insert as MemberNotInGroupError, not a raw 500', async () => {
+    const { groupId, memberIds } = await seedGroupOfThree()
+    const [payer, participant] = memberIds as [string, string]
+
+    // Simulate the race directly: createExpense's own membership check
+    // (a db.member.findMany call) is the one moment between "the payer
+    // still exists" and "the insert runs" — so deleting the payer from
+    // inside that call's own resolution reproduces the real race
+    // deterministically, against the real database and the real Prisma
+    // FK error, rather than mocking anything about the outcome.
+    const originalFindMany = ctx.db.member.findMany.bind(ctx.db.member)
+    const spy = vi.spyOn(ctx.db.member, 'findMany')
+    spy.mockImplementationOnce(
+      // Prisma's findMany returns a branded PrismaPromise (used internally
+      // for query batching), which a plain async function's Promise can't
+      // structurally satisfy even though it resolves to the identical
+      // array — the mock never needs that batching behavior, only the
+      // resolved value, so the cast is sound.
+      (async (...args: Parameters<typeof originalFindMany>) => {
+        const result = await originalFindMany(...args)
+        await ctx.db.member.delete({ where: { id: payer } })
+        return result
+      }) as typeof ctx.db.member.findMany,
+    )
+
+    try {
+      await expect(
+        createExpense(ctx.db, {
+          groupId,
+          description: 'Race',
+          amountCents: 100,
+          paidByMemberId: payer,
+          date: new Date('2026-09-01'),
+          split: { mode: 'EQUAL', memberIds: [payer, participant] },
+        }),
+      ).rejects.toThrow(MemberNotInGroupError)
+
+      expect(await ctx.db.expense.count()).toBe(0)
+    } finally {
+      spy.mockRestore()
+    }
   })
 })
