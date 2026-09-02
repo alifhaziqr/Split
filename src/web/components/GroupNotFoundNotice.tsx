@@ -1,15 +1,18 @@
 import { Link } from 'react-router'
 
+import { errorMessageFor } from '../lib/errorMessages.js'
+
 /**
- * Shared by every page that fetches a group by id (GroupDetailPage,
- * AddExpensePage, ...) so a deleted-in-another-tab or stale-bookmark
- * GROUP_NOT_FOUND always gets the same dedicated "gone" state with a way
- * back, rather than a generic error banner on some pages and not others.
+ * Rendered by GroupGate for the 'gone' state, so a deleted-in-another-tab
+ * or stale-bookmark GROUP_NOT_FOUND always gets the same dedicated state
+ * with a way back, rather than a generic error banner. Sources its copy
+ * from errorMessageFor so the sentence has one owner, not a second
+ * hand-typed copy of errorMessages.ts's GROUP_NOT_FOUND case.
  */
 export function GroupNotFoundNotice() {
   return (
     <div>
-      <p>This group no longer exists.</p>
+      <p>{errorMessageFor('GROUP_NOT_FOUND')}</p>
       <Link to="/">Back to groups</Link>
     </div>
   )

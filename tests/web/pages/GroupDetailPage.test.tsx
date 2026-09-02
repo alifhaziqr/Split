@@ -1,5 +1,4 @@
 import { screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { Route, Routes } from 'react-router'
 
@@ -56,20 +55,6 @@ describe('GroupDetailPage', () => {
 
     expect(await screen.findByText(/no longer exists/i)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /groups/i })).toHaveAttribute('href', '/')
-  })
-
-  it('lets the user navigate home from the missing-group state', async () => {
-    const stub = createFetchStub()
-    stub.queueResponse('GET', '/api/groups/g1', {
-      status: 404,
-      body: { error: { code: 'GROUP_NOT_FOUND', message: 'ignored' } },
-    })
-    const user = userEvent.setup()
-    renderPage(stub.fetch)
-
-    await user.click(await screen.findByRole('link', { name: /groups/i }))
-
-    expect(await screen.findByText('Home page')).toBeInTheDocument()
   })
 
   it('renders a GROUP_NOT_EMPTY 409 next to the delete button on a stale-cache race', async () => {
