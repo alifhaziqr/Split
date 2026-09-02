@@ -1,5 +1,6 @@
 import { splitAmount } from '../../core/split.js'
 import type { SplitInput } from '../../core/split.js'
+import { Prisma } from '../../generated/prisma/client.js'
 import type { Expense, ExpenseShare, PrismaClient } from '../../generated/prisma/client.js'
 
 export interface CreateExpenseInput {
@@ -19,6 +20,13 @@ export class MemberNotInGroupError extends Error {
   constructor(memberId: string, groupId: string) {
     super(`Member ${memberId} does not belong to group ${groupId}`)
     this.name = 'MemberNotInGroupError'
+  }
+}
+
+export class ExpenseNotFoundError extends Error {
+  constructor(expenseId: string) {
+    super(`Expense ${expenseId} does not exist`)
+    this.name = 'ExpenseNotFoundError'
   }
 }
 
@@ -62,4 +70,30 @@ export async function createExpense(db: PrismaClient, input: CreateExpenseInput)
     },
     include: { shares: true },
   })
+}
+
+/**
+ * Deletes an Expense and every ExpenseShare that references it — the share
+ * has its own RESTRICT foreign key into Expense, so the expense delete would
+ * otherwise fail. Uses the array form of `$transaction` rather than the
+ * interactive callback form: the callback's transaction client isn't
+ * assignable to the plain `PrismaClient` parameter type this file's other
+ * functions use, and these two statements don't need each other's result.
+ *
+ * `deleteMany` never throws a not-found error — an empty match is a
+ * successful no-op — so a P2025 out of this transaction can only have come
+ * from the `expense.delete` and means the expense never existed.
+ */
+export async function deleteExpense(db: PrismaClient, expenseId: string): Promise<void> {
+  try {
+    await db.$transaction([
+      db.expenseShare.deleteMany({ where: { expenseId } }),
+      db.expense.delete({ where: { id: expenseId } }),
+    ])
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      throw new ExpenseNotFoundError(expenseId)
+    }
+    throw error
+  }
 }

@@ -8,12 +8,15 @@
   },
   "scripts": {
     "postinstall": "prisma generate",
+    "dev": "tsx watch src/server/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@hono/node-server": "^2.1.1",
     "@types/node": "^26.4.0",
+    "tsx": "^4.23.13",
     "typescript": "^7.0.2",
     "vitest": "^4.1.11"
   },
@@ -21,11 +24,14 @@
     "@prisma/adapter-better-sqlite3": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "dotenv": "^17.4.2",
-    "prisma": "^7.10.0"
+    "hono": "^4.13.5",
+    "prisma": "^7.10.0",
+    "zod": "^4.5.4"
   },
   "allowScripts": {
     "prisma@7.10.0": true,
     "@prisma/engines@7.10.0": true,
-    "better-sqlite3@12.11.1": true
+    "better-sqlite3@12.11.1": true,
+    "esbuild@0.28.2": true
   }
 }

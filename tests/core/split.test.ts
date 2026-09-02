@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { ValidationError } from '../../src/core/errors.js'
 import { splitAmount } from '../../src/core/split.js'
 import type { SplitInput } from '../../src/core/split.js'
 
@@ -205,6 +206,122 @@ describe('splitAmount SHARES', () => {
         ],
       }),
     ).toThrow(/whole/)
+  })
+})
+
+describe('splitAmount reports caller-input faults as ValidationError', () => {
+  // Every split.ts throw site is a caller-input fault — unlike money.ts,
+  // split.ts has no internal 'unreachable' guard, so all nine become
+  // ValidationError. An API layer maps the class to 422.
+  const cases: ReadonlyArray<[string, () => unknown, RegExp]> = [
+    ['EQUAL with no participants', () => splitAmount(100, { mode: 'EQUAL', memberIds: [] }), /participant/],
+    [
+      'EQUAL with a duplicate member',
+      () => splitAmount(100, { mode: 'EQUAL', memberIds: ['a', 'a'] }),
+      /duplicate/i,
+    ],
+    ['EXACT with no shares', () => splitAmount(1000, { mode: 'EXACT', shares: [] }), /participant/],
+    [
+      'EXACT with a duplicate member',
+      () =>
+        splitAmount(1000, {
+          mode: 'EXACT',
+          shares: [
+            { memberId: 'a', shareCents: 500 },
+            { memberId: 'a', shareCents: 500 },
+          ],
+        }),
+      /duplicate/i,
+    ],
+    [
+      'EXACT with a fractional share',
+      () =>
+        splitAmount(1000, {
+          mode: 'EXACT',
+          shares: [
+            { memberId: 'a', shareCents: 250.5 },
+            { memberId: 'b', shareCents: 749.5 },
+          ],
+        }),
+      /integer cents/,
+    ],
+    [
+      'EXACT with a negative share',
+      () =>
+        splitAmount(1000, {
+          mode: 'EXACT',
+          shares: [
+            { memberId: 'a', shareCents: -100 },
+            { memberId: 'b', shareCents: 1100 },
+          ],
+        }),
+      /negative/,
+    ],
+    [
+      'EXACT shares not summing to the amount',
+      () =>
+        splitAmount(1000, {
+          mode: 'EXACT',
+          shares: [
+            { memberId: 'a', shareCents: 250 },
+            { memberId: 'b', shareCents: 749 },
+          ],
+        }),
+      /999.*1000|1000.*999/,
+    ],
+    [
+      'PERCENT with a fractional basis point',
+      () =>
+        splitAmount(1000, {
+          mode: 'PERCENT',
+          shares: [
+            { memberId: 'a', percentBp: 5000.5 },
+            { memberId: 'b', percentBp: 4999.5 },
+          ],
+        }),
+      /basis point/,
+    ],
+    [
+      'PERCENT with a negative percentage',
+      () =>
+        splitAmount(1000, {
+          mode: 'PERCENT',
+          shares: [
+            { memberId: 'a', percentBp: -1000 },
+            { memberId: 'b', percentBp: 11000 },
+          ],
+        }),
+      /negative|percent/,
+    ],
+    [
+      'PERCENT not summing to 100%',
+      () =>
+        splitAmount(1000, {
+          mode: 'PERCENT',
+          shares: [
+            { memberId: 'a', percentBp: 5000 },
+            { memberId: 'b', percentBp: 4000 },
+          ],
+        }),
+      /100/,
+    ],
+    [
+      'SHARES with a fractional weight',
+      () =>
+        splitAmount(100, {
+          mode: 'SHARES',
+          shares: [
+            { memberId: 'a', weight: 1.5 },
+            { memberId: 'b', weight: 1 },
+          ],
+        }),
+      /whole/,
+    ],
+  ]
+
+  it.each(cases)('%s', (_label, run, messagePattern) => {
+    expect(run).toThrow(ValidationError)
+    expect(run).toThrow(messagePattern)
   })
 })
 

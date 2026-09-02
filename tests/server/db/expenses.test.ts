@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { createGroup } from '../../../src/server/db/groups.js'
 import { addMember } from '../../../src/server/db/members.js'
-import { createExpense } from '../../../src/server/db/expenses.js'
+import { createExpense, deleteExpense, ExpenseNotFoundError } from '../../../src/server/db/expenses.js'
 import { createTestDatabase, resetDb } from './testDb.js'
 import type { TestDatabase } from './testDb.js'
 
@@ -130,6 +130,83 @@ describe('createExpense', () => {
     expect(reloaded.shares.map((s) => s.shareCents).sort()).toEqual(
       created.shares.map((s) => s.shareCents).sort(),
     )
+  })
+})
+
+describe('deleteExpense', () => {
+  it('deletes the expense and all of its shares', async () => {
+    const { groupId, memberIds } = await seedGroupOfThree()
+    const expense = await createExpense(ctx.db, {
+      groupId,
+      description: 'Dinner',
+      amountCents: 100,
+      paidByMemberId: memberIds[0] as string,
+      date: new Date('2026-09-01'),
+      split: { mode: 'EQUAL', memberIds },
+    })
+
+    await deleteExpense(ctx.db, expense.id)
+
+    expect(await ctx.db.expense.findUnique({ where: { id: expense.id } })).toBeNull()
+    expect(await ctx.db.expenseShare.count({ where: { expenseId: expense.id } })).toBe(0)
+  })
+
+  it('rejects deleting the same expense twice', async () => {
+    const { groupId, memberIds } = await seedGroupOfThree()
+    const expense = await createExpense(ctx.db, {
+      groupId,
+      description: 'Dinner',
+      amountCents: 100,
+      paidByMemberId: memberIds[0] as string,
+      date: new Date('2026-09-01'),
+      split: { mode: 'EQUAL', memberIds },
+    })
+    await deleteExpense(ctx.db, expense.id)
+
+    await expect(deleteExpense(ctx.db, expense.id)).rejects.toThrow(ExpenseNotFoundError)
+  })
+
+  it('leaves a second, unrelated expense and its shares untouched', async () => {
+    const { groupId, memberIds } = await seedGroupOfThree()
+    const first = await createExpense(ctx.db, {
+      groupId,
+      description: 'Dinner',
+      amountCents: 100,
+      paidByMemberId: memberIds[0] as string,
+      date: new Date('2026-09-01'),
+      split: { mode: 'EQUAL', memberIds },
+    })
+    const second = await createExpense(ctx.db, {
+      groupId,
+      description: 'Groceries',
+      amountCents: 200,
+      paidByMemberId: memberIds[1] as string,
+      date: new Date('2026-09-01'),
+      split: { mode: 'EQUAL', memberIds },
+    })
+
+    await deleteExpense(ctx.db, first.id)
+
+    const remainingShares = await ctx.db.expenseShare.findMany({ where: { expenseId: second.id } })
+    expect(remainingShares).toHaveLength(second.shares.length)
+    expect(await ctx.db.expense.findUnique({ where: { id: second.id } })).not.toBeNull()
+  })
+
+  it('leaves the group and its members untouched', async () => {
+    const { groupId, memberIds } = await seedGroupOfThree()
+    const expense = await createExpense(ctx.db, {
+      groupId,
+      description: 'Dinner',
+      amountCents: 100,
+      paidByMemberId: memberIds[0] as string,
+      date: new Date('2026-09-01'),
+      split: { mode: 'EQUAL', memberIds },
+    })
+
+    await deleteExpense(ctx.db, expense.id)
+
+    expect(await ctx.db.group.findUnique({ where: { id: groupId } })).not.toBeNull()
+    expect(await ctx.db.member.count({ where: { groupId } })).toBe(memberIds.length)
   })
 })
 

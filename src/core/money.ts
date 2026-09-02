@@ -4,9 +4,11 @@
  * silently rounding it, because a rounded cent is a bug that hides for months.
  */
 
+import { ValidationError } from './errors.js'
+
 function assertIntegerCents(cents: number, label: string): void {
   if (!Number.isSafeInteger(cents)) {
-    throw new Error(`${label} must be integer cents, got ${cents}`)
+    throw new ValidationError(`${label} must be integer cents, got ${cents}`)
   }
 }
 
@@ -29,7 +31,7 @@ const AMOUNT_PATTERN = /^-?\d+(\.\d{1,2})?$/
 export function parseAmountToCents(input: string): number {
   const trimmed = input.trim()
   if (!AMOUNT_PATTERN.test(trimmed)) {
-    throw new Error(`Not a valid amount: ${JSON.stringify(input)}`)
+    throw new ValidationError(`Not a valid amount: ${JSON.stringify(input)}`)
   }
 
   const negative = trimmed.startsWith('-')
@@ -62,32 +64,32 @@ export function allocate(
 ): Map<string, number> {
   assertIntegerCents(totalCents, 'total')
   if (totalCents < 0) {
-    throw new Error(`Cannot allocate a negative total: ${totalCents}`)
+    throw new ValidationError(`Cannot allocate a negative total: ${totalCents}`)
   }
   if (weights.length === 0) {
-    throw new Error('Allocation needs at least one participant')
+    throw new ValidationError('Allocation needs at least one participant')
   }
 
   const seen = new Set<string>()
   let totalWeight = 0
   for (const { memberId, weight } of weights) {
     if (seen.has(memberId)) {
-      throw new Error(`Duplicate participant in allocation: ${memberId}`)
+      throw new ValidationError(`Duplicate participant in allocation: ${memberId}`)
     }
     seen.add(memberId)
 
     // Integer weights keep `totalCents * weight` an exact integer numerator,
     // which is what the largest-remainder proof below depends on.
     if (!Number.isSafeInteger(weight)) {
-      throw new Error(`Allocation weight must be a whole number, got ${weight} for ${memberId}`)
+      throw new ValidationError(`Allocation weight must be a whole number, got ${weight} for ${memberId}`)
     }
     if (weight < 0) {
-      throw new Error(`Allocation weight must be zero or positive, got ${weight} for ${memberId}`)
+      throw new ValidationError(`Allocation weight must be zero or positive, got ${weight} for ${memberId}`)
     }
     totalWeight += weight
   }
   if (totalWeight <= 0) {
-    throw new Error('Allocation weights must not sum to zero')
+    throw new ValidationError('Allocation weights must not sum to zero')
   }
 
   // Exact share = totalCents * weight / totalWeight, kept as an integer

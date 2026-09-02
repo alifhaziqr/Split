@@ -7,6 +7,7 @@
  * EXACT is the odd one out: the caller supplies the cents, so we only check them.
  */
 
+import { ValidationError } from './errors.js'
 import { allocate } from './money.js'
 import type { AllocationWeight } from './money.js'
 
@@ -56,27 +57,27 @@ function splitEqually(amountCents: number, memberIds: readonly string[]): Map<st
 
 function splitExactly(amountCents: number, shares: readonly ExactShare[]): Map<string, number> {
   if (shares.length === 0) {
-    throw new Error('An expense needs at least one participant')
+    throw new ValidationError('An expense needs at least one participant')
   }
 
   const result = new Map<string, number>()
   let total = 0
   for (const { memberId, shareCents } of shares) {
     if (result.has(memberId)) {
-      throw new Error(`Duplicate participant in split: ${memberId}`)
+      throw new ValidationError(`Duplicate participant in split: ${memberId}`)
     }
     if (!Number.isSafeInteger(shareCents)) {
-      throw new Error(`Share must be integer cents, got ${shareCents} for ${memberId}`)
+      throw new ValidationError(`Share must be integer cents, got ${shareCents} for ${memberId}`)
     }
     if (shareCents < 0) {
-      throw new Error(`Share must not be negative: ${shareCents} for ${memberId}`)
+      throw new ValidationError(`Share must not be negative: ${shareCents} for ${memberId}`)
     }
     result.set(memberId, shareCents)
     total += shareCents
   }
 
   if (total !== amountCents) {
-    throw new Error(`Exact shares sum to ${total}, expected ${amountCents}`)
+    throw new ValidationError(`Exact shares sum to ${total}, expected ${amountCents}`)
   }
   return result
 }
@@ -85,17 +86,17 @@ function splitByPercent(amountCents: number, shares: readonly PercentShare[]): M
   let totalBp = 0
   const weights: AllocationWeight[] = shares.map(({ memberId, percentBp }) => {
     if (!Number.isSafeInteger(percentBp)) {
-      throw new Error(`Percentage must be whole basis points, got ${percentBp} for ${memberId}`)
+      throw new ValidationError(`Percentage must be whole basis points, got ${percentBp} for ${memberId}`)
     }
     if (percentBp < 0) {
-      throw new Error(`Percentage must not be negative: ${percentBp} for ${memberId}`)
+      throw new ValidationError(`Percentage must not be negative: ${percentBp} for ${memberId}`)
     }
     totalBp += percentBp
     return { memberId, weight: percentBp }
   })
 
   if (shares.length > 0 && totalBp !== PERCENT_TOTAL_BP) {
-    throw new Error(
+    throw new ValidationError(
       `Percentages must sum to 100% (${PERCENT_TOTAL_BP} basis points), got ${totalBp}`,
     )
   }
@@ -105,7 +106,7 @@ function splitByPercent(amountCents: number, shares: readonly PercentShare[]): M
 function splitByWeight(amountCents: number, shares: readonly WeightedShare[]): Map<string, number> {
   const weights: AllocationWeight[] = shares.map(({ memberId, weight }) => {
     if (!Number.isSafeInteger(weight)) {
-      throw new Error(`Split weight must be a whole number, got ${weight} for ${memberId}`)
+      throw new ValidationError(`Split weight must be a whole number, got ${weight} for ${memberId}`)
     }
     return { memberId, weight }
   })

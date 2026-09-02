@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { createExpense } from '../../../src/server/db/expenses.js'
-import { createGroup } from '../../../src/server/db/groups.js'
-import { addMember, deleteMember, DuplicateMemberError, GroupNotFoundError, MemberNotFoundError, MemberReferencedError } from '../../../src/server/db/members.js'
+import { createGroup, GroupNotFoundError } from '../../../src/server/db/groups.js'
+import { addMember, deleteMember, DuplicateMemberError, MemberNotFoundError, MemberReferencedError } from '../../../src/server/db/members.js'
 import { createTestDatabase, resetDb } from './testDb.js'
 import type { TestDatabase } from './testDb.js'
 
