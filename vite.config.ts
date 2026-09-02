@@ -3,11 +3,17 @@
  *
  * Vitest does NOT read this file — when vitest.config.ts exists vitest loads
  * that instead, and its `web` project declares its own `plugins: [react()]`.
- * If a plugin or a resolve alias is added here, add it there too.
+ * If a plugin or a resolve alias is added here, add it there too — with one
+ * deliberate exception: `tailwindcss()` below is NOT mirrored into
+ * vitest.config.ts. That plugin transforms CSS only; no test imports
+ * index.css (main.tsx is its sole importer, and main.tsx is deliberately
+ * untested — see its own docblock), and jsdom computes no styles regardless,
+ * so mirroring it would add a CSS scan to every web test run for nothing.
  */
 
 import { fileURLToPath } from 'node:url'
 
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
@@ -18,7 +24,7 @@ export default defineConfig({
   // rather than at the repo root. Absolute paths throughout, so that nothing
   // below has to be read relative to this `root`.
   root: fileURLToPath(new URL('src/web', repoRoot)),
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   build: {
     outDir: fileURLToPath(new URL('dist/web', repoRoot)),
     // Required because outDir is outside `root`: Vite refuses to clear such a

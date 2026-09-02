@@ -9,6 +9,8 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 
+import { cn } from '../lib/cn.js'
+
 export function ConfirmButton(props: {
   readonly onConfirm: () => void
   readonly disabled?: boolean | undefined
@@ -20,6 +22,7 @@ export function ConfirmButton(props: {
     <button
       type="button"
       disabled={props.disabled}
+      className={cn(armed && 'border-danger bg-danger text-accent-fg hover:opacity-90')}
       onBlur={() => setArmed(false)}
       onClick={() => {
         if (!armed) {

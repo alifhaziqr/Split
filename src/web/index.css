@@ -1,48 +1,95 @@
+@import 'tailwindcss';
+
+/*
+ * Semantic color tokens, not raw palette names, so the ramp can change in
+ * one place. Values are Tailwind's own slate/blue/emerald/rose/red scale —
+ * this file previously hand-copied those same hex codes one at a time
+ * (--color-accent was #2563eb, i.e. blue-600) before Tailwind was adopted.
+ *
+ * Dark mode works by overriding these custom properties inside a
+ * prefers-color-scheme media query further down, NOT via `dark:` variants
+ * in markup — every generated utility (bg-canvas, text-muted, ...) resolves
+ * through var(--color-*), so the whole UI flips from one place.
+ */
+@theme {
+  --color-canvas: var(--color-slate-50);
+  --color-surface: #ffffff;
+  --color-fg: var(--color-slate-900);
+  --color-muted: var(--color-slate-500);
+  --color-subtle: var(--color-slate-200);
+  --color-accent: var(--color-blue-600);
+  --color-accent-fg: #ffffff;
+  --color-positive: var(--color-emerald-600);
+  --color-negative: var(--color-rose-600);
+  --color-danger: var(--color-red-700);
+}
+
 :root {
   color-scheme: light dark;
-  --color-bg: #ffffff;
-  --color-fg: #1a1a1a;
-  --color-muted: #6b7280;
-  --color-border: #d1d5db;
-  --color-accent: #2563eb;
-  --color-danger: #b91c1c;
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 1rem;
-  --space-4: 1.5rem;
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: #111827;
-    --color-fg: #f3f4f6;
-    --color-muted: #9ca3af;
-    --color-border: #374151;
-    --color-accent: #60a5fa;
+    --color-canvas: var(--color-slate-950);
+    --color-surface: var(--color-slate-900);
+    --color-fg: var(--color-slate-100);
+    --color-muted: var(--color-slate-400);
+    --color-subtle: var(--color-slate-800);
+    --color-accent: var(--color-blue-400);
+    --color-accent-fg: var(--color-slate-950);
+    --color-positive: var(--color-emerald-400);
+    --color-negative: var(--color-rose-400);
+    --color-danger: var(--color-red-400);
   }
 }
 
-* {
-  box-sizing: border-box;
+body {
+  background: var(--color-canvas);
+  color: var(--color-fg);
 }
 
-body {
-  margin: 0;
-  background: var(--color-bg);
-  color: var(--color-fg);
-  padding: var(--space-4);
+/* Baseline element layer — Preflight (bundled with the @import above) strips
+   all browser default styling, so this lands in the same step as the theme
+   above rather than as a follow-up: there is no intermediate commit where
+   Tailwind is installed but the app isn't at least readable. */
+@layer base {
+  h1 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+  h2 {
+    @apply text-lg font-semibold tracking-tight;
+  }
+  a {
+    @apply text-accent underline-offset-2 hover:underline;
+  }
+  label {
+    @apply block text-sm font-medium text-muted;
+  }
+  input,
+  select {
+    @apply mt-1 block w-full rounded-md border border-subtle bg-surface px-3 py-1.5 text-fg;
+  }
+  input:focus-visible,
+  select:focus-visible,
+  button:focus-visible,
+  a:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+  button {
+    @apply rounded-md border border-subtle bg-surface px-3 py-1.5 font-medium text-fg;
+  }
+  button:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+  fieldset {
+    @apply rounded-md border border-subtle p-3;
+  }
+  legend {
+    @apply px-1 text-sm font-medium text-muted;
+  }
 }
 
 [role='alert'] {
-  color: var(--color-danger);
-  border: 1px solid var(--color-danger);
-  border-radius: 4px;
-  padding: var(--space-2);
-  margin: var(--space-2) 0;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+  @apply rounded-md border border-danger px-3 py-2 text-danger;
 }

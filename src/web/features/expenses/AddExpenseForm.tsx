@@ -63,43 +63,49 @@ export function AddExpenseForm(props: { readonly groupId: string; readonly membe
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="expense-description">Description</label>
-        <input id="expense-description" value={description} onChange={(e) => setDescription(e.target.value)} required />
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-subtle bg-surface p-4">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex-1">
+          <label htmlFor="expense-description">Description</label>
+          <input id="expense-description" value={description} onChange={(e) => setDescription(e.target.value)} required />
+        </div>
+        <div className="sm:w-32">
+          <label htmlFor="expense-amount">Amount</label>
+          <input
+            id="expense-amount"
+            inputMode="decimal"
+            value={amountText}
+            onChange={(e) => setAmountText(e.target.value)}
+            required
+          />
+        </div>
       </div>
-      <div>
-        <label htmlFor="expense-amount">Amount</label>
-        <input
-          id="expense-amount"
-          inputMode="decimal"
-          value={amountText}
-          onChange={(e) => setAmountText(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="expense-paid-by">Paid by</label>
-        <select id="expense-paid-by" value={paidByMemberId} onChange={(e) => setPaidByMemberId(e.target.value)} required>
-          <option value="">Select a payer</option>
-          {props.members.map((member) => (
-            <option key={member.id} value={member.id}>
-              {member.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label htmlFor="expense-date">Date</label>
-        <input id="expense-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex-1">
+          <label htmlFor="expense-paid-by">Paid by</label>
+          <select id="expense-paid-by" value={paidByMemberId} onChange={(e) => setPaidByMemberId(e.target.value)} required>
+            <option value="">Select a payer</option>
+            {props.members.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="sm:w-40">
+          <label htmlFor="expense-date">Date</label>
+          <input id="expense-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+        </div>
       </div>
 
-      <SplitModeTabs mode={draft.mode} onChange={(mode) => setDraft({ ...draft, mode })} />
-      <SplitEditor members={props.members} draft={draft} onChange={setDraft} />
-      <SplitSummary status={status} />
+      <div className="space-y-2">
+        <SplitModeTabs mode={draft.mode} onChange={(mode) => setDraft({ ...draft, mode })} />
+        <SplitEditor members={props.members} draft={draft} onChange={setDraft} />
+        <SplitSummary status={status} />
+      </div>
 
       {preview !== null && (
-        <ul>
+        <ul className="space-y-1 rounded-md bg-canvas p-3 text-sm tabular-nums">
           {[...preview.entries()].map(([memberId, cents]) => {
             const member = props.members.find((m) => m.id === memberId)
             return (
@@ -107,7 +113,9 @@ export function AddExpenseForm(props: { readonly groupId: string; readonly membe
                 {/* formatCents, not (cents / 100).toFixed(2) — this is a
                     money display, and CLAUDE.md's rule against floats for
                     money applies to every display, not only arithmetic that
-                    feeds back into storage. */}
+                    feeds back into storage. Kept as one text run (not split
+                    into separate name/amount elements) — AddExpenseForm.test.tsx
+                    asserts on the concatenated "Ana: 28.17" string. */}
                 {member?.name ?? memberId}: {formatCents(cents)}
               </li>
             )
@@ -115,7 +123,11 @@ export function AddExpenseForm(props: { readonly groupId: string; readonly membe
         </ul>
       )}
 
-      <button type="submit" disabled={!canSubmit}>
+      <button
+        type="submit"
+        disabled={!canSubmit}
+        className="border-transparent bg-accent text-accent-fg hover:opacity-90"
+      >
         {createExpense.isPending ? 'Adding…' : 'Add expense'}
       </button>
       <ErrorBanner error={createExpense.error} />

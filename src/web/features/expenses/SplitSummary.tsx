@@ -31,5 +31,9 @@ function summaryText(status: SplitStatus): string {
 }
 
 export function SplitSummary(props: { readonly status: SplitStatus }) {
-  return <p aria-live="polite">{summaryText(props.status)}</p>
+  return (
+    <p aria-live="polite" className="text-sm text-muted">
+      {summaryText(props.status)}
+    </p>
+  )
 }

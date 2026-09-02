@@ -8,9 +8,11 @@ export function GroupsPage() {
   const groups = useGroupsQuery()
 
   return (
-    <div>
+    <div className="space-y-6">
       <h1>Groups</h1>
-      <CreateGroupForm />
+      <div className="rounded-lg border border-subtle bg-surface p-4">
+        <CreateGroupForm />
+      </div>
       {groups.isPending && <Spinner label="Loading groups…" />}
       {groups.isError && <ErrorBanner error={groups.error} />}
       {groups.isSuccess && <GroupList groups={groups.data.groups} />}

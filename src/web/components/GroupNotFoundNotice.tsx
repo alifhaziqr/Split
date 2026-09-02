@@ -11,8 +11,8 @@ import { errorMessageFor } from '../lib/errorMessages.js'
  */
 export function GroupNotFoundNotice() {
   return (
-    <div>
-      <p>{errorMessageFor('GROUP_NOT_FOUND')}</p>
+    <div className="space-y-2 rounded-lg border border-subtle bg-surface p-4 text-center">
+      <p className="text-muted">{errorMessageFor('GROUP_NOT_FOUND')}</p>
       <Link to="/">Back to groups</Link>
     </div>
   )

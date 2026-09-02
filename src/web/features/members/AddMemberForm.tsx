@@ -21,10 +21,16 @@ export function AddMemberForm(props: { readonly groupId: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label htmlFor="add-member-name">Name</label>
-      <input id="add-member-name" value={name} onChange={(e) => setName(e.target.value)} required />
-      <button type="submit" disabled={addMember.isPending}>
+    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
+      <div className="flex-1">
+        <label htmlFor="add-member-name">Name</label>
+        <input id="add-member-name" value={name} onChange={(e) => setName(e.target.value)} required />
+      </div>
+      <button
+        type="submit"
+        disabled={addMember.isPending}
+        className="border-transparent bg-accent text-accent-fg hover:opacity-90"
+      >
         {addMember.isPending ? 'Adding…' : 'Add member'}
       </button>
       <ErrorBanner error={addMember.error} />

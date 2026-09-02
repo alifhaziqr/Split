@@ -23,7 +23,7 @@ export function SettlementSection(props: { readonly groupId: string; readonly me
   }
 
   return (
-    <section>
+    <section className="space-y-4 rounded-lg border border-subtle bg-surface p-4">
       <h2>Settle up</h2>
       <BalanceList balances={settlement.data.balances} members={props.members} currency={props.currency} />
       <TransferList transfers={settlement.data.transfers} members={props.members} currency={props.currency} />

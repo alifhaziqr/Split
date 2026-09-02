@@ -16,7 +16,7 @@ export function ExpenseList(props: {
   }
 
   return (
-    <ul>
+    <ul className="space-y-2">
       {/* Order preserved as served — the server already sorts newest-first
           (see server/api/dto.ts's toGroupDetailsDto), so this must not re-sort. */}
       {props.expenses.map((expense) => (

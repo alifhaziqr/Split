@@ -10,7 +10,7 @@ import { formatCents } from '../../core/money.js'
 
 export function Money(props: { readonly cents: number; readonly currency: string }) {
   return (
-    <span>
+    <span className="tabular-nums">
       {formatCents(props.cents)} {props.currency}
     </span>
   )

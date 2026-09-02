@@ -63,13 +63,13 @@ export function SplitEditor(props: {
   }
 
   return (
-    <fieldset>
+    <fieldset className="space-y-2">
       <legend>Participants</legend>
       {members.map((member) => {
         const selected = draft.participantIds.includes(member.id)
         return (
-          <div key={member.id}>
-            <label>
+          <div key={member.id} className="flex flex-wrap items-center gap-3">
+            <label className="inline-flex items-center gap-2 text-sm font-normal text-fg">
               <input
                 type="checkbox"
                 checked={selected}
@@ -81,20 +81,22 @@ export function SplitEditor(props: {
               <input
                 aria-label={`${member.name} amount`}
                 inputMode="decimal"
+                className="mt-0 w-28"
                 value={rawText[rawTextKey(member.id)] ?? ''}
                 onChange={(e) => handleExactChange(member.id, e.target.value)}
               />
             )}
             {selected && draft.mode === 'PERCENT' && (
-              <>
+              <span className="inline-flex items-center gap-1.5">
                 <input
                   aria-label={`${member.name} percent`}
                   inputMode="decimal"
+                  className="mt-0 w-20"
                   value={rawText[rawTextKey(member.id)] ?? ''}
                   onChange={(e) => handlePercentChange(member.id, e.target.value)}
                 />
-                %
-              </>
+                <span className="text-sm text-muted">%</span>
+              </span>
             )}
             {selected && draft.mode === 'SHARES' && (
               <input
@@ -102,6 +104,7 @@ export function SplitEditor(props: {
                 type="number"
                 min={0}
                 step={1}
+                className="mt-0 w-20"
                 value={draft.weightById.get(member.id) ?? 1}
                 onChange={(e) => handleWeightChange(member.id, e.target.value)}
               />

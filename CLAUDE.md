@@ -93,6 +93,14 @@ over example-by-example assertions.
   two mixed-payer expenses, confirm the settle-up section's transfers zero every balance —
   driven through the real UI against a real migrated database, not a scripted fetch stub).
   374 tests.
+- **M6 done** — a visual design pass over `src/web` with Tailwind CSS v4: an `@theme` block of
+  semantic color tokens in `index.css` replacing the old hand-rolled global rules, an
+  `AppShell` (sticky header, centred content), card surfaces, and a proportional
+  `BalanceBar` on the settle-up view (`features/settlement/balanceBar.ts`, written
+  test-first). Presentation only — no changes to `src/core`, `src/server`, or any query
+  hook. All 25 existing `.tsx` files gained `className`s; the suite's near-total
+  presentation-agnosticism (see Conventions below) meant this cost zero test rewrites. 390
+  tests.
 - **Next** — not yet decided.
 
 ## Conventions settled in M1
@@ -362,3 +370,51 @@ than adding code:**
   site that can fail), so a malformed value reaching this deep, interior component would mean
   a real upstream bug — the same "trust internal code, don't defend against scenarios that
   can't happen" reasoning `core/settle.ts`'s own un-subclassed throws already document above.
+
+## Conventions settled in M6
+
+**`@tailwindcss/vite` is deliberately NOT mirrored into `vitest.config.ts`'s `web` project**,
+breaking the rule `vite.config.ts`'s own header comment states for every other plugin. That
+rule exists so a transform difference can't make a test pass while the real app breaks — it
+doesn't apply here because Tailwind transforms CSS only, no test imports `index.css`
+(`main.tsx` is its sole importer, and `main.tsx` is deliberately untested), and jsdom computes
+no styles regardless. Mirroring it would add a CSS scan to every web test run for nothing.
+`vite.config.ts`'s comment records this exception so it isn't "fixed" by a future reader.
+
+**Dark mode uses no `dark:` variant anywhere in markup.** `index.css`'s `@theme` block defines
+semantic tokens (`--color-canvas`, `--color-fg`, `--color-accent`, ...) that Tailwind's
+generated utilities resolve through `var()` at use time; a `prefers-color-scheme` media query
+overrides those same custom properties on `:root`, and every utility across the app flips at
+once. Verified in the actual built CSS, not assumed: `dist/web/assets/*.css` shows `a{color:
+var(--color-accent);...}`, not an inlined value, confirming the indirection survives Tailwind's
+production build (lightningcss minification does not inline theme values here).
+
+**Tailwind Preflight strips all browser default styling** the instant the plugin is added —
+list bullets, heading sizes, button chrome, form-control borders — so there is no safe
+intermediate commit between "Tailwind installed" and "baseline element layer written." Both
+landed in one step. A future removal or major-version bump of Tailwind should be checked in a
+real browser before merging, not just via `npm test`, for the same reason the invariants below
+need a real browser too.
+
+**A short list of structural facts protect the whole suite from a restyle, and must keep
+holding:** expense rows and member rows stay `<li>` elements; the "Settle up" `<h2>` stays
+inside a `<section>` (`integration/addExpenseFlow.test.tsx` does `.closest('section')`);
+`BalanceList`/`TransferList` render exactly one `<li>` per data row — `BalanceBar` is a
+decorative `aria-hidden` sibling inside that `<li>`, never a list item of its own;
+`ErrorBanner` returns literal `null` (no wrapper element) when there is no error; every button
+keeps a **text** accessible name (icons, if ever added, must be `aria-hidden` and additive);
+every input keeps its `<label>` association. `Money.tsx` and any place that concatenates a
+name with an amount (`BalanceList`, `AddExpenseForm`'s preview list) must keep the literal
+punctuation and whitespace between them as real text nodes in document order — `toHaveTextContent`
+and `getByText` both operate on concatenated `textContent`, which does not insert a space or
+colon that isn't actually in the DOM.
+
+**`npm test` cannot catch a missing or misapplied Tailwind utility class**, the same blind
+spot that let the M5 `/api` proxy bug ship with a fully green suite — no test renders through
+a real browser's CSS engine. A restyle's manual verification pass (real `npm run dev` +
+`npm run dev:web`, both color schemes, a narrow viewport) is not optional polish; it's the
+only check that would have caught it. It did, once, in this milestone: `AddExpenseForm`'s
+Description/Amount and Paid-by/Date rows used fixed-width columns (`w-32`, `w-40`) that
+clipped the `<select>`'s visible text on a 375px viewport — invisible to every automated
+check, fixed by making those columns stack (`sm:flex-row`, `sm:w-32`/`sm:w-40`) below the `sm`
+breakpoint.

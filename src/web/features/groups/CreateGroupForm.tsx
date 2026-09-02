@@ -24,16 +24,22 @@ export function CreateGroupForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="create-group-name">Name</label>
-        <input id="create-group-name" value={name} onChange={(e) => setName(e.target.value)} required />
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="flex flex-wrap gap-3">
+        <div className="flex-1">
+          <label htmlFor="create-group-name">Name</label>
+          <input id="create-group-name" value={name} onChange={(e) => setName(e.target.value)} required />
+        </div>
+        <div className="w-28">
+          <label htmlFor="create-group-currency">Currency</label>
+          <input id="create-group-currency" value={currency} onChange={(e) => setCurrency(e.target.value)} required />
+        </div>
       </div>
-      <div>
-        <label htmlFor="create-group-currency">Currency</label>
-        <input id="create-group-currency" value={currency} onChange={(e) => setCurrency(e.target.value)} required />
-      </div>
-      <button type="submit" disabled={createGroup.isPending}>
+      <button
+        type="submit"
+        disabled={createGroup.isPending}
+        className="border-transparent bg-accent text-accent-fg hover:opacity-90"
+      >
         {createGroup.isPending ? 'Creating…' : 'Create group'}
       </button>
       <ErrorBanner error={createGroup.error} />

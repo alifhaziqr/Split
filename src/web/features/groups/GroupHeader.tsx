@@ -24,17 +24,23 @@ export function GroupHeader(props: { readonly group: WireGroupDetails }) {
   }
 
   return (
-    <header>
-      <h1>{group.name}</h1>
-      <p>{group.currency}</p>
-      <ConfirmButton onConfirm={handleDelete} disabled={!isEmpty || deleteGroup.isPending}>
-        Delete group
-      </ConfirmButton>
-      {!isEmpty && (
-        <p>
-          This group still has {group.members.length} members and {group.expenses.length} expenses.
-        </p>
-      )}
+    <header className="space-y-2 rounded-lg border border-subtle bg-surface p-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1>{group.name}</h1>
+          <p className="text-sm text-muted">{group.currency}</p>
+        </div>
+        <div className="flex flex-col items-start gap-1 sm:items-end">
+          <ConfirmButton onConfirm={handleDelete} disabled={!isEmpty || deleteGroup.isPending}>
+            Delete group
+          </ConfirmButton>
+          {!isEmpty && (
+            <p className="text-sm text-muted">
+              This group still has {group.members.length} members and {group.expenses.length} expenses.
+            </p>
+          )}
+        </div>
+      </div>
       <ErrorBanner error={deleteGroup.error} />
     </header>
   )

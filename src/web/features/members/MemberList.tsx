@@ -25,16 +25,18 @@ function MemberRow(props: { readonly groupId: string; readonly member: WireMembe
   const referencingCount = countReferencingExpenses(props.member.id, props.expenses)
 
   return (
-    <li>
-      {props.member.name}{' '}
-      <ConfirmButton
-        onConfirm={() => deleteMember.mutate(props.member.id)}
-        disabled={referenced || deleteMember.isPending}
-      >
-        Remove
-      </ConfirmButton>
+    <li className="space-y-1 rounded-lg border border-subtle bg-surface p-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-medium text-fg">{props.member.name}</span>
+        <ConfirmButton
+          onConfirm={() => deleteMember.mutate(props.member.id)}
+          disabled={referenced || deleteMember.isPending}
+        >
+          Remove
+        </ConfirmButton>
+      </div>
       {referenced && (
-        <p>
+        <p className="text-sm text-muted">
           {props.member.name} is on {referencingCount} expense
           {referencingCount === 1 ? '' : 's'}. Remove those first.
         </p>
@@ -54,7 +56,7 @@ export function MemberList(props: {
   }
 
   return (
-    <ul>
+    <ul className="space-y-2">
       {props.members.map((member) => (
         <MemberRow key={member.id} groupId={props.groupId} member={member} expenses={props.expenses} />
       ))}
