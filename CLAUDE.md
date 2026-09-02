@@ -19,9 +19,15 @@ First run only:
     npm run test:watch # vitest, watch mode
     npm run typecheck  # tsc --noEmit
     npm run dev        # tsx-watched Hono dev server (src/server/index.ts)
+    npm run dev:web     # Vite dev server for the React client (src/web), proxies /api to :3000
+    npm run build:web   # typecheck, then vite build (src/web -> dist/web)
+    npm run preview:web # serves the build:web output locally
 
 `npm install` runs `prisma generate` via `postinstall` — required before `src/generated/prisma`
 exists at all. Node 24 required (see `.nvmrc`). If versions look wrong, run `nvm use`.
+
+For local dev with the web client, run `npm run dev` and `npm run dev:web` in two terminals and
+open **http://localhost:5173** — never open :3000 directly, it serves JSON only.
 
 ## Architecture — the dependency rule
 
@@ -29,7 +35,13 @@ exists at all. Node 24 required (see `.nvmrc`). If versions look wrong, run `nvm
                 No I/O, no database, no HTTP, no framework.
     src/server  Hono API (src/server/api) + Prisma/SQLite (src/server/db). May
                 import core. Never imports web.
-    src/web     React + Vite. Imports neither. Talks to the server over HTTP only.
+    src/web     React + Vite. Never imports src/server — not even a type.
+                May import src/core inward, but only core/money.ts and
+                core/split.ts: types freely, runtime only for input parsing,
+                display formatting, and a read-only preview. Never imports
+                core/settle.ts — balances and transfers come from the
+                server, the only authority on what a group owes. Talks to
+                the server over HTTP only.
 
 If a change wants to break this rule, stop and reconsider the design. This rule is the
 reason the settlement algorithm can be tested with no browser and no database present.
@@ -71,8 +83,17 @@ over example-by-example assertions.
   too, then the design doc's own named end-to-end verification
   (`tests/server/api/endToEnd.test.ts`: a seeded group of four, five mixed-mode expenses,
   settle-up transfers applied by hand and confirmed to zero every balance). 209 tests.
-- **Next: M5** — `src/web` still exists only as an empty scaffold directory, so M5 is
-  presumably the React web client; scope beyond that is not yet decided.
+- **M5 done** — a React + Vite client under `src/web` (`net/` the injectable fetch client and
+  hand-mirrored wire types, `queries/` TanStack Query hooks, `lib/` text-parsing wrappers
+  around core, `components/`, `features/{groups,members,expenses,settlement}/`, `pages/`),
+  covering full CRUD for groups/members/expenses plus the settle-up view. Test-first, then a
+  `/code-review` pass whose findings were verified and fixed test-first too, then the
+  milestone's own named end-to-end verification
+  (`tests/web/integration/addExpenseFlow.test.tsx`: create a group, add three members, record
+  two mixed-payer expenses, confirm the settle-up section's transfers zero every balance —
+  driven through the real UI against a real migrated database, not a scripted fetch stub).
+  374 tests.
+- **Next** — not yet decided.
 
 ## Conventions settled in M1
 
@@ -232,3 +253,112 @@ doesn't belong to this group" — both look identical to a `findFirst({ id: memb
 request body is rejected the same way whether or not the `groupId` in the URL happens to be
 real, so there's no reason to pay for a `SELECT` before the schema check that would have
 rejected it for free.
+
+## Conventions settled in M5
+
+**`src/web` may import `src/core`, but only `core/money.ts` and `core/split.ts` — never
+`src/server`, and never `core/settle.ts`.** See the Architecture section above for the exact
+wording. `core` is genuinely browser-safe (zero npm deps, zero Node built-ins), and basis
+points are to percent exactly what cents are to dollars — `parseAmountToCents('33.33')`
+returns `3333`, which *is* the `percentBp` the API wants — so `lib/amount.ts` and
+`lib/percent.ts` delegate to `parseAmountToCents`/`formatCents` rather than re-implementing
+the two-decimal parsing rule in the one place a human types a decimal. `core/settle.ts` stays
+off limits because balances and transfers come from the server, the only authority on what a
+group owes; the client's own `AddExpenseForm` preview calls `core/split.ts`'s `splitAmount`
+directly to show the M1 largest-remainder allocation before submitting, but that is strictly a
+preview — the server recomputes and stores its own result.
+`tests/core/dependencyRule.test.ts` enforces the whole rule by resolving every relative import
+against its own file's directory, not by matching substrings.
+
+**Core throws; the UI needs values.** `parseAmountToCents`/`formatCents` keep their throwing
+contract (the server depends on it) — `lib/amount.ts` and `lib/percent.ts` each wrap a call in
+`try { } catch { }` (catching `unknown`, never `instanceof ValidationError` — see the M3 note
+above on `instanceof` against an import silently resolving to `undefined`) and substitute
+web-owned, user-facing copy. Core owns the rule; web owns the words — core's own message
+JSON-stringifies the user's raw input back at them, which is a developer sentence, not
+something to show a user.
+
+**Wire DTOs are hand-mirrored in `src/web/net/types.ts`, never imported from
+`src/server/api/dto.ts`.** That file imports Prisma's generated client, which is gitignored
+and only exists after `postinstall`; importing it from web would couple the client's type
+graph to generated output it has no business depending on. The mirror is proven honest at
+**compile time** by `tests/web/net/types.test.ts`'s `Exact<A, B>` conditional-type assertions
+(verified by mutation: renaming a field on either side makes `npm run typecheck` fail) and at
+**runtime** by `tests/web/net/contractLive.test.ts`, which drives the real web API client
+against the real Hono app (`createApp(db).request` injected as the client's `fetch`) — catching
+response-shape drift that a mocked-fetch unit test cannot.
+
+**`src/web/net/` — not `src/web/api/` or `src/web/apiClient/` — because of a proxy-matching
+trap only visible by actually running `npm run dev:web` in a browser, not by any test.**
+Vite's dev server serves source files at a URL path mirroring their location under `root`
+(`src/web`), so a file at `src/web/api/client.ts` is served at `/api/client.ts` — colliding
+with `vite.config.ts`'s `server.proxy['/api']` rule for the *real* backend. Worse,
+`http-proxy-middleware` matches that proxy key as a plain **string prefix**, not a path
+segment: `/apiClient/apiClientContext.tsx` still starts with the literal string `/api` and
+gets proxied to the Hono server too (which 404s it), so renaming `api/` to `apiClient/` did
+not fix it — only a directory name that doesn't start with `api` at all does. `npm test` and
+`npm run typecheck` were both green throughout this bug because no test spins up the real
+Vite dev server; only opening the app in an actual browser surfaced it (three `Failed to load
+resource: 404` console errors). If a future rename ever reintroduces a path segment starting
+with `api`, re-check the dev server in a browser, not just `npm test`.
+
+**The API client is a factory that takes `fetch` as an argument, never `globalThis.fetch`
+directly** (`createApiClient({ fetch, baseUrl })`, built on `createRequest(fetchImpl)`) —
+matching every existing seam in this repo (`createApp(db)`, `createDbClient(url)`,
+`createHttpClient(getApp)`). This is what makes both the mocked-fetch unit tests and the
+real-app contract test possible with the same production code, and it's why components reach
+the client through `ApiClientProvider`/`useApiClient` rather than a module-level singleton.
+
+**`groupKeys.settlement(id)` is nested *under* `groupKeys.detail(id)`, not a sibling key.**
+TanStack Query's `invalidateQueries` is prefix-matched, so invalidating `detail(id)` refetches
+both in one call — correct because no mutation changes a group's members or expenses without
+also changing its settlement (`server/settlement.ts` seeds a zero balance for every member, so
+a brand-new member appears in `balances` immediately).
+`tests/web/queries/queryKeys.test.ts` asserts the prefix relationship directly, and
+`tests/web/queries/members.test.tsx` proves it actually triggers a second fetch — not just
+that the keys look right in isolation. `useDeleteGroup` **removes** (not invalidates) the
+deleted group's `detail` entry: invalidating it would refetch straight into a 404 and flash an
+error on the way out. `useDeleteExpense`'s mutation variables are `{expenseId, groupId}` even
+though `DELETE /api/expenses/:expenseId` sends only the id — `groupId` exists solely so the
+mutation knows which group's cache to invalidate, and is easy to drop by accident.
+
+**Each `MemberList` row calls `useDeleteMember` itself — one mutation instance per row, not
+one shared instance reused across the list.** A shared mutation's `isPending`/`error` are
+global to the whole list: two different rows' Remove buttons confirmed in quick succession
+(before a re-render commits the first click's `isPending`) could both fire, and a later row's
+error could get attributed to the wrong row. Verified directly: temporarily reverting to the
+shared-mutation version makes `tests/web/features/members/MemberList.test.tsx`'s
+in-flight-isolation test fail exactly as predicted.
+
+**`SplitEditor`'s local raw-text buffer is keyed by `` `${mode}:${memberId}` ``, not
+`memberId` alone.** EXACT and PERCENT each get their own text slot; keying by member id alone
+let one mode's typed-but-not-yet-parsed text reappear as if it had been entered into the other
+mode after a switch (e.g. typing "50.00" in EXACT, switching to PERCENT, and seeing "50.00"
+sitting in the percent field as if 50% had been typed, while the committed value was actually
+still unset). The SHARES weight stepper commits only a validated non-negative integer — an
+in-progress decimal or a stray `-` is never propagated to the draft, so a value `splitStatus`
+would accept as "balanced" can never be one the server's `z.int()` schema would reject.
+
+**Every money display goes through `formatCents` (usually via the `Money` component), never
+`(cents / 100).toFixed(2)`.** This applies even to a client-side-only preview with no arithmetic
+feeding back into storage — CLAUDE.md's "never floats for money" rule is about every display,
+not only paths that write to storage. No divergent value has actually been found across the
+whole practical cents range (V8's `toFixed` happens to round correctly there), so this is
+enforced for consistency with the rest of the app and the stated architectural principle, not
+because a concrete rendering bug was reproduced.
+
+**Two things a `/code-review` pass flagged and this milestone deliberately left as is, rather
+than adding code:**
+- `tsconfig.json`'s `lib` now includes `"DOM"`/`"DOM.Iterable"` program-wide (there is only one
+  tsconfig — see the "why one tsconfig" reasoning that would otherwise apply here), so
+  `src/core`/`src/server` can now reference `window`/`document` without a type error. `lib`
+  was never the real enforcement mechanism for the dependency rule — `tests/core/
+  dependencyRule.test.ts` is — so this is a real but already-accepted cost of staying on one
+  tsconfig rather than a two-tsconfig split, not a regression to fix.
+- `components/Money.tsx` calls `formatCents` with no guard, so a non-integer `cents` value
+  would throw and, with no `ErrorBoundary` anywhere in `App.tsx`/`main.tsx`, blank the page.
+  Every `cents` value that reaches `Money` originates from a server DTO or from `core/
+  split.ts`'s own `splitAmount` (already wrapped in its own `try`/`catch` at the one call
+  site that can fail), so a malformed value reaching this deep, interior component would mean
+  a real upstream bug — the same "trust internal code, don't defend against scenarios that
+  can't happen" reasoning `core/settle.ts`'s own un-subclassed throws already document above.

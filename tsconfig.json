@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2023",
-    "lib": ["ES2023"],
+    // "DOM"/"DOM.Iterable" is for src/web's browser code; skipLibCheck below
+    // already suppresses the classic DOM-vs-@types/node global collisions
+    // (fetch, Headers, AbortController, ...) this introduces.
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "types": ["node", "vitest/globals"],
