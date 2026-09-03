@@ -113,3 +113,8 @@ Deliberate boundaries for a learning project of this size, not gaps waiting to b
   permanent and unlogged.
 - **No real multi-currency support** — currency is a stored label, not converted or enforced.
 - **No expense edit history.**
+
+## Learning
+
+This project solely exist for testing on how Claude Code implement itself based of my prompts
+and knowledge.
