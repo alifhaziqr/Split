@@ -279,3 +279,17 @@ client, and a Tailwind visual pass. 390 tests; `npm test`, `npm run typecheck`, 
 CI (lint, typecheck, test, build) on push/PR.
 
 **Next** — not yet decided.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in this repo's GitHub Issues (`alifhaziqr/Split`), via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default label vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
