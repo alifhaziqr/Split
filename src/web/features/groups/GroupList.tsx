@@ -1,26 +1,31 @@
 import { Link } from 'react-router'
 
 import { EmptyState } from '../../components/EmptyState.js'
+import { EmptyGroupsIllustration } from '../../components/illustrations.js'
 import type { WireGroup } from '../../net/types.js'
 
 export function GroupList(props: { readonly groups: readonly WireGroup[] }) {
   if (props.groups.length === 0) {
-    return <EmptyState message="No groups yet" />
+    return (
+      <EmptyState
+        message="No groups yet"
+        illustration={<EmptyGroupsIllustration className="h-full w-full" />}
+      />
+    )
   }
 
   return (
-    <ul className="space-y-2">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {props.groups.map((group) => (
-        <li key={group.id} className="rounded-lg border border-subtle bg-surface">
-          <Link
-            to={`/groups/${group.id}`}
-            className="flex items-center justify-between px-4 py-3 no-underline hover:bg-canvas hover:no-underline"
-          >
-            <span className="font-medium text-fg">{group.name}</span>
-            <span className="text-sm text-muted">{group.currency}</span>
-          </Link>
-        </li>
+        <Link
+          key={group.id}
+          to={`/groups/${group.id}`}
+          className="hero-panel flex flex-col gap-1 rounded-3xl border border-subtle bg-surface p-5 shadow-sm no-underline hover:no-underline"
+        >
+          <span className="text-base font-semibold text-fg">{group.name}</span>
+          <span className="text-sm text-muted">{group.currency}</span>
+        </Link>
       ))}
-    </ul>
+    </div>
   )
 }

@@ -24,7 +24,7 @@ export function GroupHeader(props: { readonly group: WireGroupDetails }) {
   }
 
   return (
-    <header className="space-y-2 rounded-lg border border-subtle bg-surface p-4">
+    <header className="space-y-2 rounded-3xl border border-subtle bg-surface p-4 shadow-sm">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1>{group.name}</h1>

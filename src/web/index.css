@@ -17,11 +17,20 @@
   --color-fg: var(--color-slate-900);
   --color-muted: var(--color-slate-500);
   --color-subtle: var(--color-slate-200);
-  --color-accent: var(--color-blue-600);
+  --color-accent: var(--color-teal-600);
   --color-accent-fg: #ffffff;
   --color-positive: var(--color-emerald-600);
   --color-negative: var(--color-rose-600);
   --color-danger: var(--color-red-700);
+  /* Soft wash behind the settle-up panel and each group tile — see
+     docs/adr/0001-ui-restyle-scope.md. Built from --color-accent so it
+     tracks the light/dark accent flip below without its own dark override. */
+  --gradient-hero: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-accent) 16%, transparent),
+    color-mix(in oklab, var(--color-violet-400) 14%, transparent) 60%,
+    transparent
+  );
 }
 
 :root {
@@ -36,7 +45,7 @@
     --color-fg: var(--color-slate-100);
     --color-muted: var(--color-slate-400);
     --color-subtle: var(--color-slate-800);
-    --color-accent: var(--color-blue-400);
+    --color-accent: var(--color-teal-400);
     --color-accent-fg: var(--color-slate-950);
     --color-positive: var(--color-emerald-400);
     --color-negative: var(--color-rose-400);
@@ -92,4 +101,10 @@ body {
 
 [role='alert'] {
   @apply rounded-md border border-danger px-3 py-2 text-danger;
+}
+
+/* Settle-up panel and group tiles — winner of the mattpocock-skills:prototype
+   UI spike (Variant B), see docs/adr/0001-ui-restyle-scope.md. */
+.hero-panel {
+  background-image: var(--gradient-hero);
 }

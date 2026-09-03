@@ -10,7 +10,7 @@ export function GroupsPage() {
   return (
     <div className="space-y-6">
       <h1>Groups</h1>
-      <div className="rounded-lg border border-subtle bg-surface p-4">
+      <div className="rounded-3xl border border-subtle bg-surface p-4 shadow-sm">
         <CreateGroupForm />
       </div>
       {groups.isPending && <Spinner label="Loading groups…" />}

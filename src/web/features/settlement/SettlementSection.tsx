@@ -27,7 +27,7 @@ export function SettlementSection(props: {
   }
 
   return (
-    <section className="space-y-4 rounded-lg border border-subtle bg-surface p-4">
+    <section className="hero-panel space-y-4 rounded-3xl border border-subtle bg-surface p-6 shadow-sm">
       <h2>Settle up</h2>
       <BalanceList
         balances={settlement.data.balances}

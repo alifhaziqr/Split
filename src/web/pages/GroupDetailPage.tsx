@@ -16,39 +16,41 @@ export function GroupDetailPage() {
         <div className="space-y-6">
           <GroupHeader group={details} />
 
-          <section className="space-y-3 rounded-lg border border-subtle bg-surface p-4">
-            <h2>Members</h2>
-            <MemberList
-              groupId={details.id}
-              members={details.members}
-              expenses={details.expenses}
-            />
-            <AddMemberForm groupId={details.id} />
-          </section>
-
-          <section className="space-y-3 rounded-lg border border-subtle bg-surface p-4">
-            <div className="flex items-center justify-between">
-              <h2>Expenses</h2>
-              <Link
-                to={`/groups/${details.id}/expenses/new`}
-                className="text-sm font-medium"
-              >
-                Add expense
-              </Link>
-            </div>
-            <ExpenseList
-              groupId={details.id}
-              expenses={details.expenses}
-              members={details.members}
-              currency={details.currency}
-            />
-          </section>
-
           <SettlementSection
             groupId={details.id}
             members={details.members}
             currency={details.currency}
           />
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <section className="space-y-3 rounded-3xl border border-subtle bg-surface p-4 shadow-sm">
+              <h2>Members</h2>
+              <MemberList
+                groupId={details.id}
+                members={details.members}
+                expenses={details.expenses}
+              />
+              <AddMemberForm groupId={details.id} />
+            </section>
+
+            <section className="space-y-3 rounded-3xl border border-subtle bg-surface p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <h2>Expenses</h2>
+                <Link
+                  to={`/groups/${details.id}/expenses/new`}
+                  className="text-sm font-medium"
+                >
+                  Add expense
+                </Link>
+              </div>
+              <ExpenseList
+                groupId={details.id}
+                expenses={details.expenses}
+                members={details.members}
+                currency={details.currency}
+              />
+            </section>
+          </div>
         </div>
       )}
     </GroupGate>
