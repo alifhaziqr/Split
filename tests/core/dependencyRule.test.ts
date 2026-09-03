@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import { readFileSync, readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve, sep } from 'node:path'
+import { describe, expect, it } from 'vitest'
 
 const REPO_ROOT = join(__dirname, '..', '..')
 const CORE_DIR = join(REPO_ROOT, 'src', 'core')
@@ -58,7 +58,10 @@ describe('the dependency rule', () => {
       }
     }
 
-    expect(violations, `src/core imports reaching outside src/core:\n${violations.join('\n')}`).toEqual([])
+    expect(
+      violations,
+      `src/core imports reaching outside src/core:\n${violations.join('\n')}`,
+    ).toEqual([])
   })
 
   it('never lets src/server import toward src/web', () => {
@@ -79,7 +82,10 @@ describe('the dependency rule', () => {
       }
     }
 
-    expect(violations, `src/server imports reaching toward src/web:\n${violations.join('\n')}`).toEqual([])
+    expect(
+      violations,
+      `src/server imports reaching toward src/web:\n${violations.join('\n')}`,
+    ).toEqual([])
   })
 
   it('lets src/web import npm packages and its own files freely, but only money/split from core, and never server', () => {
@@ -109,7 +115,9 @@ describe('the dependency rule', () => {
         // the repo's convention.
         const resolved = resolve(dirname(filePath), specifier)
         const underWeb = resolved === WEB_DIR || resolved.startsWith(WEB_DIR + sep)
-        const isAllowedCoreModule = resolved === join(CORE_DIR, 'money.js') || resolved === join(CORE_DIR, 'split.js')
+        const isAllowedCoreModule =
+          resolved === join(CORE_DIR, 'money.js') ||
+          resolved === join(CORE_DIR, 'split.js')
 
         if (!underWeb && !isAllowedCoreModule) {
           violations.push(`${filePath}: '${specifier}'`)
@@ -117,6 +125,9 @@ describe('the dependency rule', () => {
       }
     }
 
-    expect(violations, `src/web imports reaching outside its allowlist:\n${violations.join('\n')}`).toEqual([])
+    expect(
+      violations,
+      `src/web imports reaching outside its allowlist:\n${violations.join('\n')}`,
+    ).toEqual([])
   })
 })

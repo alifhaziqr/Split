@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { ErrorBanner } from '../../components/ErrorBanner.js'
@@ -28,11 +28,21 @@ export function CreateGroupForm() {
       <div className="flex flex-wrap gap-3">
         <div className="flex-1">
           <label htmlFor="create-group-name">Name</label>
-          <input id="create-group-name" value={name} onChange={(e) => setName(e.target.value)} required />
+          <input
+            id="create-group-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
         </div>
         <div className="w-28">
           <label htmlFor="create-group-currency">Currency</label>
-          <input id="create-group-currency" value={currency} onChange={(e) => setCurrency(e.target.value)} required />
+          <input
+            id="create-group-currency"
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            required
+          />
         </div>
       </div>
       <button

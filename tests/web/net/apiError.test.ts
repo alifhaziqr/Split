@@ -4,7 +4,9 @@ import { ApiError, isApiError } from '../../../src/web/net/apiError.js'
 
 describe('ApiError', () => {
   it('carries status, a known code, message, and issues', () => {
-    const error = new ApiError(409, 'DUPLICATE_MEMBER', 'Ana already exists', [{ path: ['name'] }])
+    const error = new ApiError(409, 'DUPLICATE_MEMBER', 'Ana already exists', [
+      { path: ['name'] },
+    ])
 
     expect(error).toBeInstanceOf(Error)
     expect(error.status).toBe(409)

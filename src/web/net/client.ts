@@ -10,8 +10,8 @@
  * contract test can inject the real Hono app's app.request — see http.ts.
  */
 
-import { createRequest } from './http.js'
 import type { FetchLike } from './http.js'
+import { createRequest } from './http.js'
 import type {
   AddMemberBody,
   CreateExpenseBody,
@@ -34,10 +34,14 @@ export function createApiClient(options: ApiClientOptions = {}) {
   const request = createRequest(fetchImpl)
 
   return {
-    createGroup: (body: CreateGroupBody) => request<WireGroup>('POST', `${base}/api/groups`, body),
-    listGroups: () => request<{ groups: readonly WireGroup[] }>('GET', `${base}/api/groups`),
-    getGroup: (groupId: string) => request<WireGroupDetails>('GET', `${base}/api/groups/${groupId}`),
-    deleteGroup: (groupId: string) => request<undefined>('DELETE', `${base}/api/groups/${groupId}`),
+    createGroup: (body: CreateGroupBody) =>
+      request<WireGroup>('POST', `${base}/api/groups`, body),
+    listGroups: () =>
+      request<{ groups: readonly WireGroup[] }>('GET', `${base}/api/groups`),
+    getGroup: (groupId: string) =>
+      request<WireGroupDetails>('GET', `${base}/api/groups/${groupId}`),
+    deleteGroup: (groupId: string) =>
+      request<undefined>('DELETE', `${base}/api/groups/${groupId}`),
 
     addMember: (groupId: string, body: AddMemberBody) =>
       request<WireMember>('POST', `${base}/api/groups/${groupId}/members`, body),
@@ -48,9 +52,11 @@ export function createApiClient(options: ApiClientOptions = {}) {
       request<WireExpense>('POST', `${base}/api/groups/${groupId}/expenses`, body),
     // Deliberately not group-scoped in its URL, matching the server: an
     // expense id alone is enough to find and delete it.
-    deleteExpense: (expenseId: string) => request<undefined>('DELETE', `${base}/api/expenses/${expenseId}`),
+    deleteExpense: (expenseId: string) =>
+      request<undefined>('DELETE', `${base}/api/expenses/${expenseId}`),
 
-    getSettlement: (groupId: string) => request<WireSettlement>('GET', `${base}/api/groups/${groupId}/settlement`),
+    getSettlement: (groupId: string) =>
+      request<WireSettlement>('GET', `${base}/api/groups/${groupId}/settlement`),
   }
 }
 

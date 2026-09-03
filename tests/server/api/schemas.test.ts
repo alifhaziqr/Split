@@ -9,7 +9,10 @@ import {
 
 describe('SplitInputSchema', () => {
   it('parses a valid EQUAL split', () => {
-    const result = SplitInputSchema.safeParse({ mode: 'EQUAL', memberIds: ['m1', 'm2', 'm3'] })
+    const result = SplitInputSchema.safeParse({
+      mode: 'EQUAL',
+      memberIds: ['m1', 'm2', 'm3'],
+    })
     expect(result.success).toBe(true)
   })
 
@@ -141,7 +144,11 @@ describe('CreateGroupSchema', () => {
   })
 
   it('rejects an unrecognized top-level field', () => {
-    const result = CreateGroupSchema.safeParse({ name: 'Trip', currency: 'USD', extra: 1 })
+    const result = CreateGroupSchema.safeParse({
+      name: 'Trip',
+      currency: 'USD',
+      extra: 1,
+    })
     expect(result.success).toBe(false)
   })
 })

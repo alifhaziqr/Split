@@ -11,7 +11,10 @@ export function useGroupsQuery() {
 
 export function useGroupQuery(groupId: string) {
   const client = useApiClient()
-  return useQuery({ queryKey: groupKeys.detail(groupId), queryFn: () => client.getGroup(groupId) })
+  return useQuery({
+    queryKey: groupKeys.detail(groupId),
+    queryFn: () => client.getGroup(groupId),
+  })
 }
 
 export function useCreateGroup() {

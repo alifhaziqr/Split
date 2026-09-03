@@ -12,17 +12,26 @@ describe('useAddMember', () => {
     // This is the test that proves the queryKeys.ts prefix design actually
     // works end to end, not just that the keys look right in isolation.
     const stub = createFetchStub()
-    stub.queueResponse('POST', '/api/groups/g1/members', { status: 201, body: { id: 'm2', name: 'Bob' } })
+    stub.queueResponse('POST', '/api/groups/g1/members', {
+      status: 201,
+      body: { id: 'm2', name: 'Bob' },
+    })
     stub.queueResponse('GET', '/api/groups/g1/settlement', {
       status: 200,
       body: { balances: [{ memberId: 'm1', balanceCents: 0 }], transfers: [] },
     })
     const { Wrapper, queryClient } = createProvidersWrapper({ fetch: stub.fetch })
-    queryClient.setQueryData(groupKeys.detail('g1'), { id: 'g1', members: [], expenses: [] })
+    queryClient.setQueryData(groupKeys.detail('g1'), {
+      id: 'g1',
+      members: [],
+      expenses: [],
+    })
 
     const settlement = renderHook(() => useSettlementQuery('g1'), { wrapper: Wrapper })
     await waitFor(() => expect(settlement.result.current.isSuccess).toBe(true))
-    const settlementCallCountAfterMount = stub.calls.filter((c) => c.path === '/api/groups/g1/settlement').length
+    const settlementCallCountAfterMount = stub.calls.filter(
+      (c) => c.path === '/api/groups/g1/settlement',
+    ).length
     expect(settlementCallCountAfterMount).toBe(1)
 
     const addMember = renderHook(() => useAddMember('g1'), { wrapper: Wrapper })
@@ -36,7 +45,9 @@ describe('useAddMember', () => {
     // staleTime: 0) refetch completes, so the real proof is a second fetch
     // actually happening — not the transient flag.
     await waitFor(() => {
-      const count = stub.calls.filter((c) => c.path === '/api/groups/g1/settlement').length
+      const count = stub.calls.filter(
+        (c) => c.path === '/api/groups/g1/settlement',
+      ).length
       expect(count).toBeGreaterThan(settlementCallCountAfterMount)
     })
   })
@@ -47,7 +58,11 @@ describe('useDeleteMember', () => {
     const stub = createFetchStub()
     stub.queueResponse('DELETE', '/api/groups/g1/members/m2', { status: 204 })
     const { Wrapper, queryClient } = createProvidersWrapper({ fetch: stub.fetch })
-    queryClient.setQueryData(groupKeys.detail('g1'), { id: 'g1', members: [], expenses: [] })
+    queryClient.setQueryData(groupKeys.detail('g1'), {
+      id: 'g1',
+      members: [],
+      expenses: [],
+    })
 
     const { result } = renderHook(() => useDeleteMember('g1'), { wrapper: Wrapper })
     result.current.mutate('m2')

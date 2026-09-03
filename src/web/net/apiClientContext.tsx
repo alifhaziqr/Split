@@ -6,15 +6,22 @@
  * app wires the one real client created in main.tsx.
  */
 
-import { createContext, useContext } from 'react'
 import type { ReactNode } from 'react'
+import { createContext, useContext } from 'react'
 
 import type { ApiClient } from './client.js'
 
 const ApiClientContext = createContext<ApiClient | null>(null)
 
-export function ApiClientProvider(props: { readonly client: ApiClient; readonly children: ReactNode }) {
-  return <ApiClientContext.Provider value={props.client}>{props.children}</ApiClientContext.Provider>
+export function ApiClientProvider(props: {
+  readonly client: ApiClient
+  readonly children: ReactNode
+}) {
+  return (
+    <ApiClientContext.Provider value={props.client}>
+      {props.children}
+    </ApiClientContext.Provider>
+  )
 }
 
 export function useApiClient(): ApiClient {

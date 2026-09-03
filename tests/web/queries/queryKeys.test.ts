@@ -19,7 +19,7 @@ describe('groupKeys', () => {
     expect(groupKeys.detail('g1')).not.toEqual(groupKeys.detail('g2'))
   })
 
-  it("nests settlement(id) under detail(id), so invalidating detail(id) also matches settlement(id)", () => {
+  it('nests settlement(id) under detail(id), so invalidating detail(id) also matches settlement(id)', () => {
     // TanStack Query invalidation is prefix-matched: invalidating
     // detail(id) must refetch settlement(id) too, in one call, because no
     // mutation in this app changes a group's members/expenses without also

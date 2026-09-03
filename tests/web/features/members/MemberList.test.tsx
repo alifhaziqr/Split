@@ -27,7 +27,10 @@ describe('MemberList', () => {
   it('disables Remove with a visible reason for a member referenced by an expense', () => {
     const stub = createFetchStub()
     const { Wrapper } = createProvidersWrapper({ fetch: stub.fetch })
-    render(<MemberList groupId="g1" members={MEMBERS} expenses={[EXPENSE_REFERENCING_M1]} />, { wrapper: Wrapper })
+    render(
+      <MemberList groupId="g1" members={MEMBERS} expenses={[EXPENSE_REFERENCING_M1]} />,
+      { wrapper: Wrapper },
+    )
 
     const anaRow = screen.getByText('Ana').closest('li')!
     const removeButton = screen.getAllByRole('button', { name: /remove/i })[0]!
@@ -41,7 +44,10 @@ describe('MemberList', () => {
     stub.queueResponse('DELETE', '/api/groups/g1/members/m2', { status: 204 })
     const user = userEvent.setup()
     const { Wrapper } = createProvidersWrapper({ fetch: stub.fetch })
-    render(<MemberList groupId="g1" members={MEMBERS} expenses={[EXPENSE_REFERENCING_M1]} />, { wrapper: Wrapper })
+    render(
+      <MemberList groupId="g1" members={MEMBERS} expenses={[EXPENSE_REFERENCING_M1]} />,
+      { wrapper: Wrapper },
+    )
 
     const bobRow = screen.getByText('Bob').closest('li')!
     const removeButton = within(bobRow).getByRole('button', { name: 'Remove' })
@@ -50,7 +56,12 @@ describe('MemberList', () => {
     await user.click(removeButton)
     await user.click(within(bobRow).getByRole('button', { name: /sure/i }))
 
-    await waitFor(() => expect(stub.calls[0]).toMatchObject({ method: 'DELETE', path: '/api/groups/g1/members/m2' }))
+    await waitFor(() =>
+      expect(stub.calls[0]).toMatchObject({
+        method: 'DELETE',
+        path: '/api/groups/g1/members/m2',
+      }),
+    )
   })
 
   it('renders a MEMBER_REFERENCED 409 from a stale-cache race next to that row', async () => {
@@ -62,7 +73,9 @@ describe('MemberList', () => {
     const user = userEvent.setup()
     const { Wrapper } = createProvidersWrapper({ fetch: stub.fetch })
     // Cache says m2 is unreferenced (stale), server disagrees.
-    render(<MemberList groupId="g1" members={MEMBERS} expenses={[]} />, { wrapper: Wrapper })
+    render(<MemberList groupId="g1" members={MEMBERS} expenses={[]} />, {
+      wrapper: Wrapper,
+    })
 
     const bobRow = screen.getByText('Bob').closest('li')!
     await user.click(within(bobRow).getByRole('button', { name: 'Remove' }))
@@ -72,7 +85,7 @@ describe('MemberList', () => {
     expect(alert).toHaveTextContent(/on one or more expenses/i)
   })
 
-  it('keeps other rows enabled while one row\'s delete is in flight — each row has its own mutation, not one shared across the list', async () => {
+  it("keeps other rows enabled while one row's delete is in flight — each row has its own mutation, not one shared across the list", async () => {
     const stub = createFetchStub()
     let resolveAnaDelete: (() => void) | undefined
     const pendingResponse = new Promise<Response>((resolve) => {
@@ -88,7 +101,9 @@ describe('MemberList', () => {
 
     const user = userEvent.setup()
     const { Wrapper } = createProvidersWrapper({ fetch: fetchWithHangingAnaDelete })
-    render(<MemberList groupId="g1" members={MEMBERS} expenses={[]} />, { wrapper: Wrapper })
+    render(<MemberList groupId="g1" members={MEMBERS} expenses={[]} />, {
+      wrapper: Wrapper,
+    })
 
     const anaRow = screen.getByText('Ana').closest('li')!
     const bobRow = screen.getByText('Bob').closest('li')!

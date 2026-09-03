@@ -8,12 +8,16 @@
  */
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-
+import type {
+  ExpenseDto,
+  GroupDetailsDto,
+  GroupDto,
+  MemberDto,
+} from '../../../src/server/api/dto.js'
 import { createApp } from '../../../src/server/app.js'
-import type { ExpenseDto, GroupDetailsDto, GroupDto, MemberDto } from '../../../src/server/api/dto.js'
 import type { Settlement } from '../../../src/server/settlement.js'
-import { createTestDatabase, resetDb } from '../db/testDb.js'
 import type { TestDatabase } from '../db/testDb.js'
+import { createTestDatabase, resetDb } from '../db/testDb.js'
 import { createHttpClient, JSON_HEADERS, readError, readJson } from './httpTestHelpers.js'
 
 let ctx: TestDatabase
@@ -71,7 +75,9 @@ describe('groups routes', () => {
     const ids = body.groups.map((g) => g.id)
     expect(new Set(ids)).toEqual(new Set([a.id, b.id]))
 
-    const again = (await readJson(await app.request('/api/groups'))) as { groups: GroupDto[] }
+    const again = (await readJson(await app.request('/api/groups'))) as {
+      groups: GroupDto[]
+    }
     expect(again.groups.map((g) => g.id)).toEqual(ids)
   })
 
@@ -136,7 +142,9 @@ describe('groups routes', () => {
     const res = await app.request('/api/this-route-does-not-exist')
 
     expect(res.status).toBe(404)
-    expect(await readJson(res)).toEqual({ error: { code: 'NOT_FOUND', message: 'Route not found' } })
+    expect(await readJson(res)).toEqual({
+      error: { code: 'NOT_FOUND', message: 'Route not found' },
+    })
   })
 
   it('runs the full group lifecycle: members, all four split modes, fetch, settle, then teardown in FK order', async () => {
@@ -199,7 +207,12 @@ describe('groups routes', () => {
       },
     })
 
-    for (const res of [sharesExpenseRes, equalExpenseRes, percentExpenseRes, exactExpenseRes]) {
+    for (const res of [
+      sharesExpenseRes,
+      equalExpenseRes,
+      percentExpenseRes,
+      exactExpenseRes,
+    ]) {
       expect(res.status).toBe(201)
     }
     const sharesExpense = (await readJson(sharesExpenseRes)) as ExpenseDto
@@ -217,7 +230,12 @@ describe('groups routes', () => {
 
     expect(details.name).toBe('Lisbon Trip')
     expect(details.members.map((m) => m.name)).toEqual(['Ana', 'Bo', 'Cy'])
-    expect(details.expenses.map((e) => e.description)).toEqual(['Rental car', 'Hotel', 'Groceries', 'Dinner'])
+    expect(details.expenses.map((e) => e.description)).toEqual([
+      'Rental car',
+      'Hotel',
+      'Groceries',
+      'Dinner',
+    ])
 
     const settlementRes = await app.request(`/api/groups/${group.id}/settlement`)
     expect(settlementRes.status).toBe(200)
@@ -232,8 +250,14 @@ describe('groups routes', () => {
     // choice of payments (see CLAUDE.md's M2 note on simplifyDebts).
     const running = new Map(settlement.balances.map((b) => [b.memberId, b.balanceCents]))
     for (const transfer of settlement.transfers) {
-      running.set(transfer.fromMemberId, (running.get(transfer.fromMemberId) ?? 0) + transfer.amountCents)
-      running.set(transfer.toMemberId, (running.get(transfer.toMemberId) ?? 0) - transfer.amountCents)
+      running.set(
+        transfer.fromMemberId,
+        (running.get(transfer.fromMemberId) ?? 0) + transfer.amountCents,
+      )
+      running.set(
+        transfer.toMemberId,
+        (running.get(transfer.toMemberId) ?? 0) - transfer.amountCents,
+      )
       expect(transfer.amountCents).toBeGreaterThan(0)
       expect(transfer.fromMemberId).not.toBe(transfer.toMemberId)
     }
@@ -361,7 +385,9 @@ describe('expenses routes', () => {
   })
 
   it('rejects a malformed body before checking the group exists, even for a bogus group', async () => {
-    const res = await postJson('/api/groups/nonexistent-group/expenses', { description: '' })
+    const res = await postJson('/api/groups/nonexistent-group/expenses', {
+      description: '',
+    })
 
     expect(res.status).toBe(400)
     expect((await readError(res)).error.code).toBe('VALIDATION_FAILED')

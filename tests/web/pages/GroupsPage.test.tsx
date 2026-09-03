@@ -10,12 +10,23 @@ describe('GroupsPage', () => {
     const stub = createFetchStub()
     stub.queueResponse('GET', '/api/groups', {
       status: 200,
-      body: { groups: [{ id: 'g1', name: 'Trip', currency: 'USD', createdAt: '2026-09-01T00:00:00.000Z' }] },
+      body: {
+        groups: [
+          {
+            id: 'g1',
+            name: 'Trip',
+            currency: 'USD',
+            createdAt: '2026-09-01T00:00:00.000Z',
+          },
+        ],
+      },
     })
     renderWithProviders(<GroupsPage />, { fetch: stub.fetch })
 
     expect(screen.getByLabelText(/name/i)).toBeInTheDocument()
-    await waitFor(() => expect(screen.getByRole('link', { name: /Trip/ })).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByRole('link', { name: /Trip/ })).toBeInTheDocument(),
+    )
   })
 
   it('renders an empty state when there are no groups', async () => {

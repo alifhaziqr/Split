@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import { ValidationError } from '../../src/core/errors.js'
-import { splitAmount } from '../../src/core/split.js'
 import type { SplitInput } from '../../src/core/split.js'
+import { splitAmount } from '../../src/core/split.js'
 
 const sum = (values: Iterable<number>): number => [...values].reduce((a, b) => a + b, 0)
 
@@ -25,11 +25,15 @@ describe('splitAmount EQUAL', () => {
   })
 
   it('rejects an expense with no participants', () => {
-    expect(() => splitAmount(100, { mode: 'EQUAL', memberIds: [] })).toThrow(/participant/)
+    expect(() => splitAmount(100, { mode: 'EQUAL', memberIds: [] })).toThrow(
+      /participant/,
+    )
   })
 
   it('rejects a member listed twice', () => {
-    expect(() => splitAmount(100, { mode: 'EQUAL', memberIds: ['a', 'a'] })).toThrow(/duplicate/i)
+    expect(() => splitAmount(100, { mode: 'EQUAL', memberIds: ['a', 'a'] })).toThrow(
+      /duplicate/i,
+    )
   })
 })
 
@@ -214,13 +218,21 @@ describe('splitAmount reports caller-input faults as ValidationError', () => {
   // split.ts has no internal 'unreachable' guard, so all nine become
   // ValidationError. An API layer maps the class to 422.
   const cases: ReadonlyArray<[string, () => unknown, RegExp]> = [
-    ['EQUAL with no participants', () => splitAmount(100, { mode: 'EQUAL', memberIds: [] }), /participant/],
+    [
+      'EQUAL with no participants',
+      () => splitAmount(100, { mode: 'EQUAL', memberIds: [] }),
+      /participant/,
+    ],
     [
       'EQUAL with a duplicate member',
       () => splitAmount(100, { mode: 'EQUAL', memberIds: ['a', 'a'] }),
       /duplicate/i,
     ],
-    ['EXACT with no shares', () => splitAmount(1000, { mode: 'EXACT', shares: [] }), /participant/],
+    [
+      'EXACT with no shares',
+      () => splitAmount(1000, { mode: 'EXACT', shares: [] }),
+      /participant/,
+    ],
     [
       'EXACT with a duplicate member',
       () =>
@@ -370,10 +382,14 @@ describe('splitAmount invariants', () => {
   })
 
   it('rejects a negative amount', () => {
-    expect(() => splitAmount(-100, { mode: 'EQUAL', memberIds: ['a'] })).toThrow(/negative/)
+    expect(() => splitAmount(-100, { mode: 'EQUAL', memberIds: ['a'] })).toThrow(
+      /negative/,
+    )
   })
 
   it('rejects a fractional amount', () => {
-    expect(() => splitAmount(10.5, { mode: 'EQUAL', memberIds: ['a'] })).toThrow(/integer cents/)
+    expect(() => splitAmount(10.5, { mode: 'EQUAL', memberIds: ['a'] })).toThrow(
+      /integer cents/,
+    )
   })
 })

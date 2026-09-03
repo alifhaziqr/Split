@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
-
-import { splitAmount } from '../../src/core/split.js'
-import { computeBalances, simplifyDebts } from '../../src/core/settle.js'
 import type { ExpenseRecord, Transfer } from '../../src/core/settle.js'
+import { computeBalances, simplifyDebts } from '../../src/core/settle.js'
+import { splitAmount } from '../../src/core/split.js'
 
 const sum = (values: Iterable<number>): number => [...values].reduce((a, b) => a + b, 0)
 
@@ -130,8 +129,16 @@ describe('simplifyDebts', () => {
       ]),
     )
     expect(transfers).toHaveLength(2)
-    expect(transfers).toContainEqual({ fromMemberId: 'c', toMemberId: 'a', amountCents: 300 })
-    expect(transfers).toContainEqual({ fromMemberId: 'b', toMemberId: 'a', amountCents: 200 })
+    expect(transfers).toContainEqual({
+      fromMemberId: 'c',
+      toMemberId: 'a',
+      amountCents: 300,
+    })
+    expect(transfers).toContainEqual({
+      fromMemberId: 'b',
+      toMemberId: 'a',
+      amountCents: 200,
+    })
   })
 
   it('nets out a circular debt instead of walking the circle', () => {
@@ -202,7 +209,9 @@ describe('simplifyDebts', () => {
       ['a', 500],
       ['d', -500],
     ])
-    expect(simplifyDebts(balances)).toEqual(simplifyDebts(new Map([...balances].reverse())))
+    expect(simplifyDebts(balances)).toEqual(
+      simplifyDebts(new Map([...balances].reverse())),
+    )
   })
 
   it('settles every balance it is given, over many random groups', () => {

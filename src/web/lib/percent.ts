@@ -8,7 +8,9 @@
 
 import { formatCents, parseAmountToCents } from '../../core/money.js'
 
-export type ParsedPercent = { readonly ok: true; readonly bp: number } | { readonly ok: false; readonly message: string }
+export type ParsedPercent =
+  | { readonly ok: true; readonly bp: number }
+  | { readonly ok: false; readonly message: string }
 
 const INVALID_PERCENT_MESSAGE = 'Enter a percentage like 33.33'
 

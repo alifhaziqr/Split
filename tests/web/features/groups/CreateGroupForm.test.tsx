@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
 import { Route, Routes, useParams } from 'react-router'
+import { describe, expect, it } from 'vitest'
 
 import { CreateGroupForm } from '../../../../src/web/features/groups/CreateGroupForm.js'
 import { createFetchStub } from '../../fetchStub.js'
@@ -15,7 +15,10 @@ function GroupPageProbe() {
 describe('CreateGroupForm', () => {
   it('submits name and currency, then navigates to the new group', async () => {
     const stub = createFetchStub()
-    stub.queueResponse('POST', '/api/groups', { status: 201, body: { id: 'g1', name: 'Trip', currency: 'USD' } })
+    stub.queueResponse('POST', '/api/groups', {
+      status: 201,
+      body: { id: 'g1', name: 'Trip', currency: 'USD' },
+    })
     const user = userEvent.setup()
 
     renderWithProviders(
@@ -40,7 +43,10 @@ describe('CreateGroupForm', () => {
 
   it('shows the server error and does not navigate on failure', async () => {
     const stub = createFetchStub()
-    stub.queueResponse('POST', '/api/groups', { status: 422, body: { error: { code: 'VALIDATION_FAILED', message: 'bad' } } })
+    stub.queueResponse('POST', '/api/groups', {
+      status: 422,
+      body: { error: { code: 'VALIDATION_FAILED', message: 'bad' } },
+    })
     const user = userEvent.setup()
 
     renderWithProviders(

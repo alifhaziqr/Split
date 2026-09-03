@@ -6,8 +6,12 @@ import { describe, expect, it, vi } from 'vitest'
 import { SplitEditor } from '../../../../src/web/features/expenses/SplitEditor.js'
 import { SplitModeTabs } from '../../../../src/web/features/expenses/SplitModeTabs.js'
 import { SplitSummary } from '../../../../src/web/features/expenses/SplitSummary.js'
-import { createInitialDraft, setMode, splitStatus } from '../../../../src/web/features/expenses/splitDraft.js'
 import type { SplitDraft } from '../../../../src/web/features/expenses/splitDraft.js'
+import {
+  createInitialDraft,
+  setMode,
+  splitStatus,
+} from '../../../../src/web/features/expenses/splitDraft.js'
 import type { WireMember } from '../../../../src/web/net/types.js'
 
 /**
@@ -18,7 +22,11 @@ import type { WireMember } from '../../../../src/web/net/types.js'
  * instead of an updating one. This wrapper matches how AddExpenseForm will
  * really use SplitEditor: draft lives in state, onChange updates it.
  */
-function StatefulSplitEditor(props: { readonly members: readonly WireMember[]; readonly initialDraft: SplitDraft; readonly onChange: (draft: SplitDraft) => void }) {
+function StatefulSplitEditor(props: {
+  readonly members: readonly WireMember[]
+  readonly initialDraft: SplitDraft
+  readonly onChange: (draft: SplitDraft) => void
+}) {
   const [draft, setDraft] = useState(props.initialDraft)
   return (
     <SplitEditor
@@ -70,7 +78,11 @@ describe('SplitSummary', () => {
   })
 
   it('confirms everything is assigned for an ok status', () => {
-    render(<SplitSummary status={{ kind: 'ok', input: { mode: 'EQUAL', memberIds: ['m1'] } }} />)
+    render(
+      <SplitSummary
+        status={{ kind: 'ok', input: { mode: 'EQUAL', memberIds: ['m1'] } }}
+      />,
+    )
 
     expect(screen.getByText(/everything is assigned/i)).toBeInTheDocument()
   })
@@ -85,7 +97,9 @@ describe('SplitEditor', () => {
 
     await user.click(screen.getByRole('checkbox', { name: 'Bob' }))
 
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ participantIds: ['m1'] }))
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ participantIds: ['m1'] }),
+    )
   })
 
   it('typing a valid EXACT amount updates the draft with parsed cents', async () => {
@@ -97,7 +111,9 @@ describe('SplitEditor', () => {
     await user.type(screen.getByLabelText('Ana amount'), '3.50')
 
     const lastCall = onChange.mock.calls.at(-1)?.[0]
-    expect(splitStatus(lastCall, 1000)).toMatchObject({ remainingCents: expect.any(Number) })
+    expect(splitStatus(lastCall, 1000)).toMatchObject({
+      remainingCents: expect.any(Number),
+    })
     expect(lastCall.exactCentsById.get('m1')).toBe(350)
   })
 
@@ -117,7 +133,9 @@ describe('SplitEditor', () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
     const draft = setMode(createInitialDraft(['m1', 'm2']), 'SHARES')
-    render(<StatefulSplitEditor members={MEMBERS} initialDraft={draft} onChange={onChange} />)
+    render(
+      <StatefulSplitEditor members={MEMBERS} initialDraft={draft} onChange={onChange} />,
+    )
 
     const input = screen.getByLabelText('Ana weight')
     await user.clear(input)
@@ -142,7 +160,9 @@ describe('SplitEditor', () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
     const exactDraft = setMode(createInitialDraft(['m1', 'm2']), 'EXACT')
-    const { rerender } = render(<SplitEditor members={MEMBERS} draft={exactDraft} onChange={onChange} />)
+    const { rerender } = render(
+      <SplitEditor members={MEMBERS} draft={exactDraft} onChange={onChange} />,
+    )
 
     await user.type(screen.getByLabelText('Ana amount'), '50.00')
 
@@ -160,7 +180,9 @@ describe('SplitEditor', () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
     const draft = setMode(createInitialDraft(['m1', 'm2']), 'SHARES')
-    render(<StatefulSplitEditor members={MEMBERS} initialDraft={draft} onChange={onChange} />)
+    render(
+      <StatefulSplitEditor members={MEMBERS} initialDraft={draft} onChange={onChange} />,
+    )
 
     const input = screen.getByLabelText('Ana weight')
     await user.clear(input)

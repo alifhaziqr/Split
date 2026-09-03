@@ -2,9 +2,15 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { createExpense } from '../../../src/server/db/expenses.js'
 import { createGroup, GroupNotFoundError } from '../../../src/server/db/groups.js'
-import { addMember, deleteMember, DuplicateMemberError, MemberNotFoundError, MemberReferencedError } from '../../../src/server/db/members.js'
-import { createTestDatabase, resetDb } from './testDb.js'
+import {
+  addMember,
+  DuplicateMemberError,
+  deleteMember,
+  MemberNotFoundError,
+  MemberReferencedError,
+} from '../../../src/server/db/members.js'
 import type { TestDatabase } from './testDb.js'
+import { createTestDatabase, resetDb } from './testDb.js'
 
 let ctx: TestDatabase
 
@@ -46,7 +52,9 @@ describe('addMember', () => {
   })
 
   it('rejects a group that does not exist', async () => {
-    await expect(addMember(ctx.db, 'nonexistent-group', 'Ana')).rejects.toThrow(GroupNotFoundError)
+    await expect(addMember(ctx.db, 'nonexistent-group', 'Ana')).rejects.toThrow(
+      GroupNotFoundError,
+    )
   })
 })
 
@@ -77,7 +85,9 @@ describe('deleteMember', () => {
   })
 
   it('rejects deleting a member that does not exist', async () => {
-    await expect(deleteMember(ctx.db, 'nonexistent-member')).rejects.toThrow(MemberNotFoundError)
+    await expect(deleteMember(ctx.db, 'nonexistent-member')).rejects.toThrow(
+      MemberNotFoundError,
+    )
   })
 
   it('rejects deleting a member who only owes a share, never paid', async () => {

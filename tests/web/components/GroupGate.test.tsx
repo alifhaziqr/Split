@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
 import { Route, Routes } from 'react-router'
+import { describe, expect, it } from 'vitest'
 
 import { GroupGate } from '../../../src/web/components/GroupGate.js'
 import { createFetchStub } from '../fetchStub.js'
@@ -19,13 +19,20 @@ const GROUP_DETAILS = {
 // No default for groupId: a caller passing `undefined` explicitly (to
 // exercise the throw-on-missing-param branch) must not be silently
 // upgraded to 'g1' by JS's own default-parameter substitution.
-function renderGate(fetch: ReturnType<typeof createFetchStub>['fetch'], groupId: string | undefined) {
+function renderGate(
+  fetch: ReturnType<typeof createFetchStub>['fetch'],
+  groupId: string | undefined,
+) {
   const { Wrapper } = createProvidersWrapper({ fetch, initialEntries: ['/groups/g1'] })
   return render(
     <Routes>
       <Route
         path="/groups/:groupId"
-        element={<GroupGate groupId={groupId}>{(details) => <p>ready: {details.name}</p>}</GroupGate>}
+        element={
+          <GroupGate groupId={groupId}>
+            {(details) => <p>ready: {details.name}</p>}
+          </GroupGate>
+        }
       />
       <Route path="/" element={<p>Home page</p>} />
     </Routes>,
@@ -66,7 +73,9 @@ describe('GroupGate', () => {
     // Default timeout: the query client retries a 5xx twice with backoff
     // (see queryClient.ts) before settling as an error — this waits out
     // that real production delay rather than fighting it.
-    expect(await screen.findByRole('alert', {}, { timeout: 5000 })).toHaveTextContent(/something went wrong/i)
+    expect(await screen.findByRole('alert', {}, { timeout: 5000 })).toHaveTextContent(
+      /something went wrong/i,
+    )
   })
 
   it('renders the children with the fetched group details once ready', async () => {

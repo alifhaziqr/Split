@@ -4,14 +4,14 @@ import { createExpense } from '../../../src/server/db/expenses.js'
 import {
   createGroup,
   deleteGroup,
-  getGroupWithDetails,
   GroupNotEmptyError,
   GroupNotFoundError,
+  getGroupWithDetails,
   listGroups,
 } from '../../../src/server/db/groups.js'
 import { addMember } from '../../../src/server/db/members.js'
-import { createTestDatabase, resetDb } from './testDb.js'
 import type { TestDatabase } from './testDb.js'
+import { createTestDatabase, resetDb } from './testDb.js'
 
 let ctx: TestDatabase
 
@@ -98,9 +98,15 @@ describe('listGroups', () => {
     // because cuids happen to be roughly monotonic would fail here: only an
     // explicit `id asc` tiebreaker makes this assertion hold.
     const tiedCreatedAt = new Date('2026-01-01T00:00:00.000Z')
-    await ctx.db.group.create({ data: { id: 'group-c', name: 'C', currency: 'EUR', createdAt: tiedCreatedAt } })
-    await ctx.db.group.create({ data: { id: 'group-a', name: 'A', currency: 'EUR', createdAt: tiedCreatedAt } })
-    await ctx.db.group.create({ data: { id: 'group-b', name: 'B', currency: 'EUR', createdAt: tiedCreatedAt } })
+    await ctx.db.group.create({
+      data: { id: 'group-c', name: 'C', currency: 'EUR', createdAt: tiedCreatedAt },
+    })
+    await ctx.db.group.create({
+      data: { id: 'group-a', name: 'A', currency: 'EUR', createdAt: tiedCreatedAt },
+    })
+    await ctx.db.group.create({
+      data: { id: 'group-b', name: 'B', currency: 'EUR', createdAt: tiedCreatedAt },
+    })
 
     const groups = await listGroups(ctx.db)
 
@@ -144,6 +150,8 @@ describe('deleteGroup', () => {
   })
 
   it('rejects deleting a group that does not exist', async () => {
-    await expect(deleteGroup(ctx.db, 'nonexistent-group')).rejects.toThrow(GroupNotFoundError)
+    await expect(deleteGroup(ctx.db, 'nonexistent-group')).rejects.toThrow(
+      GroupNotFoundError,
+    )
   })
 })

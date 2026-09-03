@@ -17,9 +17,16 @@ const EQUAL_BODY = {
 describe('useCreateExpense', () => {
   it('invalidates the group detail (which prefix-covers settlement)', async () => {
     const stub = createFetchStub()
-    stub.queueResponse('POST', '/api/groups/g1/expenses', { status: 201, body: { id: 'e1' } })
+    stub.queueResponse('POST', '/api/groups/g1/expenses', {
+      status: 201,
+      body: { id: 'e1' },
+    })
     const { Wrapper, queryClient } = createProvidersWrapper({ fetch: stub.fetch })
-    queryClient.setQueryData(groupKeys.detail('g1'), { id: 'g1', members: [], expenses: [] })
+    queryClient.setQueryData(groupKeys.detail('g1'), {
+      id: 'g1',
+      members: [],
+      expenses: [],
+    })
 
     const { result } = renderHook(() => useCreateExpense('g1'), { wrapper: Wrapper })
     result.current.mutate(EQUAL_BODY)
@@ -30,11 +37,15 @@ describe('useCreateExpense', () => {
 })
 
 describe('useDeleteExpense', () => {
-  it('takes {expenseId, groupId} and invalidates that group\'s detail — DELETE carries no groupId of its own', async () => {
+  it("takes {expenseId, groupId} and invalidates that group's detail — DELETE carries no groupId of its own", async () => {
     const stub = createFetchStub()
     stub.queueResponse('DELETE', '/api/expenses/e1', { status: 204 })
     const { Wrapper, queryClient } = createProvidersWrapper({ fetch: stub.fetch })
-    queryClient.setQueryData(groupKeys.detail('g1'), { id: 'g1', members: [], expenses: [] })
+    queryClient.setQueryData(groupKeys.detail('g1'), {
+      id: 'g1',
+      members: [],
+      expenses: [],
+    })
 
     const { result } = renderHook(() => useDeleteExpense(), { wrapper: Wrapper })
     result.current.mutate({ expenseId: 'e1', groupId: 'g1' })

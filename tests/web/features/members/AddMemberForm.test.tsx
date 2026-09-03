@@ -9,7 +9,10 @@ import { renderWithProviders } from '../../renderWithProviders.js'
 describe('AddMemberForm', () => {
   it('adds a member and clears the input on success', async () => {
     const stub = createFetchStub()
-    stub.queueResponse('POST', '/api/groups/g1/members', { status: 201, body: { id: 'm1', name: 'Ana' } })
+    stub.queueResponse('POST', '/api/groups/g1/members', {
+      status: 201,
+      body: { id: 'm1', name: 'Ana' },
+    })
     const user = userEvent.setup()
     renderWithProviders(<AddMemberForm groupId="g1" />, { fetch: stub.fetch })
 
@@ -18,7 +21,11 @@ describe('AddMemberForm', () => {
     await user.click(screen.getByRole('button', { name: /add member/i }))
 
     await waitFor(() => expect(input).toHaveValue(''))
-    expect(stub.calls[0]).toMatchObject({ method: 'POST', path: '/api/groups/g1/members', body: { name: 'Ana' } })
+    expect(stub.calls[0]).toMatchObject({
+      method: 'POST',
+      path: '/api/groups/g1/members',
+      body: { name: 'Ana' },
+    })
   })
 
   it('shows DUPLICATE_MEMBER inline and keeps the typed name so the user can edit it', async () => {

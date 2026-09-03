@@ -30,6 +30,8 @@ export function balanceBarWidthPercent(cents: number, maxAbsCents: number): numb
 }
 
 /** The group max each bar is scaled against — 0 for an empty or all-settled group. */
-export function maxAbsBalanceCents(balances: readonly { readonly balanceCents: number }[]): number {
+export function maxAbsBalanceCents(
+  balances: readonly { readonly balanceCents: number }[],
+): number {
   return balances.reduce((max, b) => Math.max(max, Math.abs(b.balanceCents)), 0)
 }

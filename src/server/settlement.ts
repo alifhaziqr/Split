@@ -6,15 +6,17 @@
  * DTO-friendly form.
  */
 
-import { computeBalances, simplifyDebts } from '../core/settle.js'
 import type { ExpenseRecord, Transfer } from '../core/settle.js'
+import { computeBalances, simplifyDebts } from '../core/settle.js'
 import type { GroupDetails } from './db/groups.js'
 
 /** One expense row plus its materialised per-member shares. */
 type ExpenseWithShares = GroupDetails['expenses'][number]
 
 /** Converts stored expense rows into core's ExpenseRecord shape. */
-export function toExpenseRecords(expenses: readonly ExpenseWithShares[]): ExpenseRecord[] {
+export function toExpenseRecords(
+  expenses: readonly ExpenseWithShares[],
+): ExpenseRecord[] {
   return expenses.map((expense) => ({
     paidByMemberId: expense.paidByMemberId,
     amountCents: expense.amountCents,

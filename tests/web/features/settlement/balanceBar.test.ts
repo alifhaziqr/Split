@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { balanceBarWidthPercent, balanceSign, maxAbsBalanceCents } from '../../../../src/web/features/settlement/balanceBar.js'
+import {
+  balanceBarWidthPercent,
+  balanceSign,
+  maxAbsBalanceCents,
+} from '../../../../src/web/features/settlement/balanceBar.js'
 
 describe('balanceSign', () => {
   it('is positive for a positive balance', () => {
@@ -59,6 +63,12 @@ describe('maxAbsBalanceCents', () => {
   })
 
   it('picks the largest magnitude regardless of sign', () => {
-    expect(maxAbsBalanceCents([{ balanceCents: 1_250 }, { balanceCents: -4_000 }, { balanceCents: 500 }])).toBe(4_000)
+    expect(
+      maxAbsBalanceCents([
+        { balanceCents: 1_250 },
+        { balanceCents: -4_000 },
+        { balanceCents: 500 },
+      ]),
+    ).toBe(4_000)
   })
 })

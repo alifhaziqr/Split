@@ -19,8 +19,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createApp } from '../../../src/server/app.js'
 import { createApiClient } from '../../../src/web/net/client.js'
 import type { FetchLike } from '../../../src/web/net/http.js'
-import { createTestDatabase, resetDb } from '../../server/db/testDb.js'
 import type { TestDatabase } from '../../server/db/testDb.js'
+import { createTestDatabase, resetDb } from '../../server/db/testDb.js'
 
 let ctx: TestDatabase
 let app: ReturnType<typeof createApp>
@@ -74,13 +74,18 @@ describe('web API client against the real server', () => {
 
     const settlement = await client.getSettlement(group.id)
     expect(settlement.balances).toHaveLength(2)
-    expect(settlement.transfers).toEqual([{ fromMemberId: bob.id, toMemberId: ana.id, amountCents: 500 }])
+    expect(settlement.transfers).toEqual([
+      { fromMemberId: bob.id, toMemberId: ana.id, amountCents: 500 },
+    ])
 
     await client.deleteExpense(expense.id)
     await client.deleteMember(group.id, ana.id)
     await client.deleteMember(group.id, bob.id)
     await client.deleteGroup(group.id)
-    await expect(client.getGroup(group.id)).rejects.toMatchObject({ status: 404, code: 'GROUP_NOT_FOUND' })
+    await expect(client.getGroup(group.id)).rejects.toMatchObject({
+      status: 404,
+      code: 'GROUP_NOT_FOUND',
+    })
   })
 
   it('surfaces a real 409 as an ApiError with the real status, code, and message', async () => {

@@ -25,7 +25,9 @@ describe('SettlementSection', () => {
       },
     })
     const { Wrapper } = createProvidersWrapper({ fetch: stub.fetch })
-    render(<SettlementSection groupId="g1" members={MEMBERS} currency="USD" />, { wrapper: Wrapper })
+    render(<SettlementSection groupId="g1" members={MEMBERS} currency="USD" />, {
+      wrapper: Wrapper,
+    })
 
     await waitFor(() => expect(screen.getByText(/Ana is owed/)).toBeInTheDocument())
     expect(screen.getByText(/Bob pays Ana/)).toBeInTheDocument()
@@ -33,9 +35,14 @@ describe('SettlementSection', () => {
 
   it('shows a loading indicator before the settlement arrives', () => {
     const stub = createFetchStub()
-    stub.queueResponse('GET', '/api/groups/g1/settlement', { status: 200, body: { balances: [], transfers: [] } })
+    stub.queueResponse('GET', '/api/groups/g1/settlement', {
+      status: 200,
+      body: { balances: [], transfers: [] },
+    })
     const { Wrapper } = createProvidersWrapper({ fetch: stub.fetch })
-    render(<SettlementSection groupId="g1" members={MEMBERS} currency="USD" />, { wrapper: Wrapper })
+    render(<SettlementSection groupId="g1" members={MEMBERS} currency="USD" />, {
+      wrapper: Wrapper,
+    })
 
     expect(screen.getByRole('status')).toBeInTheDocument()
   })

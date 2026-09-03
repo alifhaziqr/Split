@@ -5,23 +5,26 @@
  * if one ever slips through (a client bug worth surfacing, not swallowing).
  */
 
-import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { formatCents } from '../../../core/money.js'
 import { splitAmount } from '../../../core/split.js'
 import { ErrorBanner } from '../../components/ErrorBanner.js'
 import { parseAmount } from '../../lib/amount.js'
-import { useCreateExpense } from '../../queries/expenses.js'
 import type { WireMember } from '../../net/types.js'
+import { useCreateExpense } from '../../queries/expenses.js'
 import { SplitEditor } from './SplitEditor.js'
 import { SplitModeTabs } from './SplitModeTabs.js'
 import { SplitSummary } from './SplitSummary.js'
-import { createInitialDraft, splitStatus, toWireSplitInput } from './splitDraft.js'
 import type { SplitDraft } from './splitDraft.js'
+import { createInitialDraft, splitStatus, toWireSplitInput } from './splitDraft.js'
 
-export function AddExpenseForm(props: { readonly groupId: string; readonly members: readonly WireMember[] }) {
+export function AddExpenseForm(props: {
+  readonly groupId: string
+  readonly members: readonly WireMember[]
+}) {
   const navigate = useNavigate()
   const createExpense = useCreateExpense(props.groupId)
 
@@ -29,13 +32,19 @@ export function AddExpenseForm(props: { readonly groupId: string; readonly membe
   const [amountText, setAmountText] = useState('')
   const [paidByMemberId, setPaidByMemberId] = useState('')
   const [date, setDate] = useState('')
-  const [draft, setDraft] = useState<SplitDraft>(() => createInitialDraft(props.members.map((m) => m.id)))
+  const [draft, setDraft] = useState<SplitDraft>(() =>
+    createInitialDraft(props.members.map((m) => m.id)),
+  )
 
   const parsedAmount = parseAmount(amountText)
   const amountCents = parsedAmount.ok ? parsedAmount.cents : null
   const status = splitStatus(draft, amountCents)
   const canSubmit =
-    status.kind === 'ok' && description.trim() !== '' && paidByMemberId !== '' && date !== '' && !createExpense.isPending
+    status.kind === 'ok' &&
+    description.trim() !== '' &&
+    paidByMemberId !== '' &&
+    date !== '' &&
+    !createExpense.isPending
 
   let preview: ReadonlyMap<string, number> | null = null
   if (status.kind === 'ok' && amountCents !== null) {
@@ -53,7 +62,13 @@ export function AddExpenseForm(props: { readonly groupId: string; readonly membe
       return
     }
     createExpense.mutate(
-      { description, amountCents, paidByMemberId, date, split: toWireSplitInput(status.input) },
+      {
+        description,
+        amountCents,
+        paidByMemberId,
+        date,
+        split: toWireSplitInput(status.input),
+      },
       {
         onSuccess: () => {
           void navigate(`/groups/${props.groupId}`)
@@ -63,11 +78,19 @@ export function AddExpenseForm(props: { readonly groupId: string; readonly membe
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-subtle bg-surface p-4">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 rounded-lg border border-subtle bg-surface p-4"
+    >
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex-1">
           <label htmlFor="expense-description">Description</label>
-          <input id="expense-description" value={description} onChange={(e) => setDescription(e.target.value)} required />
+          <input
+            id="expense-description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
         </div>
         <div className="sm:w-32">
           <label htmlFor="expense-amount">Amount</label>
@@ -83,7 +106,12 @@ export function AddExpenseForm(props: { readonly groupId: string; readonly membe
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex-1">
           <label htmlFor="expense-paid-by">Paid by</label>
-          <select id="expense-paid-by" value={paidByMemberId} onChange={(e) => setPaidByMemberId(e.target.value)} required>
+          <select
+            id="expense-paid-by"
+            value={paidByMemberId}
+            onChange={(e) => setPaidByMemberId(e.target.value)}
+            required
+          >
             <option value="">Select a payer</option>
             {props.members.map((member) => (
               <option key={member.id} value={member.id}>
@@ -94,12 +122,21 @@ export function AddExpenseForm(props: { readonly groupId: string; readonly membe
         </div>
         <div className="sm:w-40">
           <label htmlFor="expense-date">Date</label>
-          <input id="expense-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+          <input
+            id="expense-date"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            required
+          />
         </div>
       </div>
 
       <div className="space-y-2">
-        <SplitModeTabs mode={draft.mode} onChange={(mode) => setDraft({ ...draft, mode })} />
+        <SplitModeTabs
+          mode={draft.mode}
+          onChange={(mode) => setDraft({ ...draft, mode })}
+        />
         <SplitEditor members={props.members} draft={draft} onChange={setDraft} />
         <SplitSummary status={status} />
       </div>

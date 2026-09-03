@@ -26,7 +26,9 @@ describe('createTestDatabase', () => {
       throw new Error('migration failed: syntax error in migration.sql')
     })
 
-    expect(() => createTestDatabase()).toThrow('migration failed: syntax error in migration.sql')
+    expect(() => createTestDatabase()).toThrow(
+      'migration failed: syntax error in migration.sql',
+    )
   })
 
   it('removes the temp directory it created when migration fails', () => {

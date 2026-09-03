@@ -34,7 +34,11 @@ export async function readError(response: Response): Promise<ErrorBody> {
 export function createHttpClient(getApp: () => Hono) {
   return {
     async postJson(path: string, body: unknown): Promise<Response> {
-      return await getApp().request(path, { method: 'POST', headers: JSON_HEADERS, body: JSON.stringify(body) })
+      return await getApp().request(path, {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify(body),
+      })
     },
     async del(path: string): Promise<Response> {
       return await getApp().request(path, { method: 'DELETE' })

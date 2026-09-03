@@ -1,5 +1,11 @@
+import type {
+  Expense,
+  ExpenseShare,
+  Group,
+  Member,
+  PrismaClient,
+} from '../../generated/prisma/client.js'
 import { Prisma } from '../../generated/prisma/client.js'
-import type { Expense, ExpenseShare, Group, Member, PrismaClient } from '../../generated/prisma/client.js'
 import { foreignKeyViolationKind } from './prismaErrors.js'
 
 export class GroupNotFoundError extends Error {
@@ -30,7 +36,10 @@ export interface GroupDetails extends Group {
   readonly expenses: (Expense & { shares: ExpenseShare[] })[]
 }
 
-export function getGroupWithDetails(db: PrismaClient, groupId: string): Promise<GroupDetails | null> {
+export function getGroupWithDetails(
+  db: PrismaClient,
+  groupId: string,
+): Promise<GroupDetails | null> {
   return db.group.findUnique({
     where: { id: groupId },
     include: {

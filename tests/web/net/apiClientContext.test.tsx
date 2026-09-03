@@ -11,7 +11,9 @@ function Probe() {
 
 describe('ApiClientProvider / useApiClient', () => {
   it('gives components the injected client, not a global default', () => {
-    const client = createApiClient({ fetch: async () => new Response(null, { status: 204 }) })
+    const client = createApiClient({
+      fetch: async () => new Response(null, { status: 204 }),
+    })
 
     render(
       <ApiClientProvider client={client}>

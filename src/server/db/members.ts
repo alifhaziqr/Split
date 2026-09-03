@@ -1,5 +1,5 @@
-import { Prisma } from '../../generated/prisma/client.js'
 import type { Member, PrismaClient } from '../../generated/prisma/client.js'
+import { Prisma } from '../../generated/prisma/client.js'
 import { GroupNotFoundError } from './groups.js'
 import { foreignKeyViolationKind } from './prismaErrors.js'
 
@@ -31,15 +31,24 @@ export class MemberNotFoundError extends Error {
  * duplicate name.
  */
 function violatesMemberNameUniqueness(error: unknown): boolean {
-  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
+  if (
+    !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+    error.code !== 'P2002'
+  ) {
     return false
   }
-  const meta = error.meta as { driverAdapterError?: { cause?: { constraint?: { fields?: string[] } } } } | undefined
+  const meta = error.meta as
+    | { driverAdapterError?: { cause?: { constraint?: { fields?: string[] } } } }
+    | undefined
   const fields = meta?.driverAdapterError?.cause?.constraint?.fields ?? []
   return fields.includes('name') && fields.includes('groupId')
 }
 
-export async function addMember(db: PrismaClient, groupId: string, name: string): Promise<Member> {
+export async function addMember(
+  db: PrismaClient,
+  groupId: string,
+  name: string,
+): Promise<Member> {
   try {
     return await db.member.create({ data: { groupId, name } })
   } catch (error) {

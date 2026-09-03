@@ -39,7 +39,10 @@ export function createMemberRoutes(db: PrismaClient): Hono {
     // changes a Member's groupId, so a member found scoped to (memberId,
     // groupId) here cannot have moved to a different group by the time the
     // delete below runs.
-    const member = await db.member.findFirst({ where: { id: memberId, groupId }, select: { id: true } })
+    const member = await db.member.findFirst({
+      where: { id: memberId, groupId },
+      select: { id: true },
+    })
     if (member === null) {
       throw new MemberNotFoundError(memberId)
     }

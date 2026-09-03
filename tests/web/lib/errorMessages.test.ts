@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
-
-import { API_ERROR_CODES } from '../../../src/web/net/apiError.js'
 import { errorMessageFor } from '../../../src/web/lib/errorMessages.js'
+import { API_ERROR_CODES } from '../../../src/web/net/apiError.js'
 
 describe('errorMessageFor', () => {
   it('maps every documented ApiErrorCode to a non-empty, non-generic sentence', () => {
@@ -9,7 +8,13 @@ describe('errorMessageFor', () => {
     // this test grows itself the moment a new code is added to
     // apiError.ts — exactly the guarantee errorMessages.ts's exhaustive
     // switch is meant to provide.
-    const genericCodes = new Set(['INTERNAL_ERROR', 'NETWORK_ERROR', 'NOT_FOUND', 'VALIDATION_FAILED', 'MALFORMED_JSON'])
+    const genericCodes = new Set([
+      'INTERNAL_ERROR',
+      'NETWORK_ERROR',
+      'NOT_FOUND',
+      'VALIDATION_FAILED',
+      'MALFORMED_JSON',
+    ])
 
     for (const code of API_ERROR_CODES) {
       const message = errorMessageFor(code)

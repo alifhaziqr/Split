@@ -14,13 +14,22 @@
 import type { WireExpense } from '../../net/types.js'
 
 function referencesMember(expense: WireExpense, memberId: string): boolean {
-  return expense.paidByMemberId === memberId || expense.shares.some((share) => share.memberId === memberId)
+  return (
+    expense.paidByMemberId === memberId ||
+    expense.shares.some((share) => share.memberId === memberId)
+  )
 }
 
-export function isMemberReferenced(memberId: string, expenses: readonly WireExpense[]): boolean {
+export function isMemberReferenced(
+  memberId: string,
+  expenses: readonly WireExpense[],
+): boolean {
   return expenses.some((expense) => referencesMember(expense, memberId))
 }
 
-export function countReferencingExpenses(memberId: string, expenses: readonly WireExpense[]): number {
+export function countReferencingExpenses(
+  memberId: string,
+  expenses: readonly WireExpense[],
+): number {
   return expenses.filter((expense) => referencesMember(expense, memberId)).length
 }

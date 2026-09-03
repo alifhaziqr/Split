@@ -21,9 +21,10 @@ if (databaseUrl === undefined || databaseUrl === '') {
 }
 
 const parsedPort = Number(process.env.PORT)
-const port = process.env.PORT !== undefined && process.env.PORT !== '' && Number.isFinite(parsedPort)
-  ? parsedPort
-  : 3000
+const port =
+  process.env.PORT !== undefined && process.env.PORT !== '' && Number.isFinite(parsedPort)
+    ? parsedPort
+    : 3000
 
 const db = createDbClient(databaseUrl)
 const app = createApp(db)

@@ -15,7 +15,12 @@ import { parseAmount } from '../../lib/amount.js'
 import { parsePercentToBp } from '../../lib/percent.js'
 import type { WireMember } from '../../net/types.js'
 import type { SplitDraft } from './splitDraft.js'
-import { setExactCents, setPercentBp, setWeight, toggleParticipant } from './splitDraft.js'
+import {
+  setExactCents,
+  setPercentBp,
+  setWeight,
+  toggleParticipant,
+} from './splitDraft.js'
 
 export function SplitEditor(props: {
   readonly members: readonly WireMember[]

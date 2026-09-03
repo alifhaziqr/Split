@@ -7,8 +7,8 @@
  * that might contain a stack trace or the user's own input echoed back.
  */
 
-import { isApiError } from '../net/apiError.js'
 import { errorMessageFor } from '../lib/errorMessages.js'
+import { isApiError } from '../net/apiError.js'
 
 const GENERIC_MESSAGE = 'Something went wrong. Please try again.'
 
@@ -17,7 +17,9 @@ export function ErrorBanner(props: { readonly error: unknown }) {
     return null
   }
 
-  const message = isApiError(props.error) ? errorMessageFor(props.error.code) : GENERIC_MESSAGE
+  const message = isApiError(props.error)
+    ? errorMessageFor(props.error.code)
+    : GENERIC_MESSAGE
 
   return <div role="alert">{message}</div>
 }

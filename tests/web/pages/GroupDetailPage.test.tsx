@@ -1,12 +1,15 @@
 import { screen, waitFor } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
 import { Route, Routes } from 'react-router'
+import { describe, expect, it } from 'vitest'
 
 import { GroupDetailPage } from '../../../src/web/pages/GroupDetailPage.js'
 import { createFetchStub } from '../fetchStub.js'
 import { renderWithProviders } from '../renderWithProviders.js'
 
-function renderPage(fetch: ReturnType<typeof createFetchStub>['fetch'], initialEntries = ['/groups/g1']) {
+function renderPage(
+  fetch: ReturnType<typeof createFetchStub>['fetch'],
+  initialEntries = ['/groups/g1'],
+) {
   return renderWithProviders(
     <Routes>
       <Route path="/groups/:groupId" element={<GroupDetailPage />} />
@@ -38,11 +41,18 @@ describe('GroupDetailPage', () => {
     })
     renderPage(stub.fetch)
 
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'Trip' })).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Trip' })).toBeInTheDocument(),
+    )
     expect(screen.getByText('Ana')).toBeInTheDocument()
     expect(screen.getByText(/no expenses yet/i)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /add expense/i })).toHaveAttribute('href', '/groups/g1/expenses/new')
-    await waitFor(() => expect(screen.getAllByText(/settled up/i).length).toBeGreaterThan(0))
+    expect(screen.getByRole('link', { name: /add expense/i })).toHaveAttribute(
+      'href',
+      '/groups/g1/expenses/new',
+    )
+    await waitFor(() =>
+      expect(screen.getAllByText(/settled up/i).length).toBeGreaterThan(0),
+    )
   })
 
   it('renders a dedicated missing-group state for GROUP_NOT_FOUND, not a thrown error', async () => {
@@ -60,10 +70,15 @@ describe('GroupDetailPage', () => {
   it('renders a GROUP_NOT_EMPTY 409 next to the delete button on a stale-cache race', async () => {
     const stub = createFetchStub()
     stub.queueResponse('GET', '/api/groups/g1', { status: 200, body: GROUP_DETAILS })
-    stub.queueResponse('GET', '/api/groups/g1/settlement', { status: 200, body: { balances: [], transfers: [] } })
+    stub.queueResponse('GET', '/api/groups/g1/settlement', {
+      status: 200,
+      body: { balances: [], transfers: [] },
+    })
     renderPage(stub.fetch)
 
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'Trip' })).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Trip' })).toBeInTheDocument(),
+    )
     // GROUP_DETAILS has members, so delete is already predicted-disabled —
     // this just confirms that predicted-empty path renders the reason text.
     expect(screen.getByText(/still has/i)).toBeInTheDocument()

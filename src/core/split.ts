@@ -8,8 +8,8 @@
  */
 
 import { ValidationError } from './errors.js'
-import { allocate } from './money.js'
 import type { AllocationWeight } from './money.js'
+import { allocate } from './money.js'
 
 export type SplitMode = 'EQUAL' | 'EXACT' | 'PERCENT' | 'SHARES'
 
@@ -50,12 +50,21 @@ export function splitAmount(amountCents: number, input: SplitInput): Map<string,
   }
 }
 
-function splitEqually(amountCents: number, memberIds: readonly string[]): Map<string, number> {
-  const weights: AllocationWeight[] = memberIds.map((memberId) => ({ memberId, weight: 1 }))
+function splitEqually(
+  amountCents: number,
+  memberIds: readonly string[],
+): Map<string, number> {
+  const weights: AllocationWeight[] = memberIds.map((memberId) => ({
+    memberId,
+    weight: 1,
+  }))
   return allocate(amountCents, weights)
 }
 
-function splitExactly(amountCents: number, shares: readonly ExactShare[]): Map<string, number> {
+function splitExactly(
+  amountCents: number,
+  shares: readonly ExactShare[],
+): Map<string, number> {
   if (shares.length === 0) {
     throw new ValidationError('An expense needs at least one participant')
   }
@@ -67,10 +76,14 @@ function splitExactly(amountCents: number, shares: readonly ExactShare[]): Map<s
       throw new ValidationError(`Duplicate participant in split: ${memberId}`)
     }
     if (!Number.isSafeInteger(shareCents)) {
-      throw new ValidationError(`Share must be integer cents, got ${shareCents} for ${memberId}`)
+      throw new ValidationError(
+        `Share must be integer cents, got ${shareCents} for ${memberId}`,
+      )
     }
     if (shareCents < 0) {
-      throw new ValidationError(`Share must not be negative: ${shareCents} for ${memberId}`)
+      throw new ValidationError(
+        `Share must not be negative: ${shareCents} for ${memberId}`,
+      )
     }
     result.set(memberId, shareCents)
     total += shareCents
@@ -82,14 +95,21 @@ function splitExactly(amountCents: number, shares: readonly ExactShare[]): Map<s
   return result
 }
 
-function splitByPercent(amountCents: number, shares: readonly PercentShare[]): Map<string, number> {
+function splitByPercent(
+  amountCents: number,
+  shares: readonly PercentShare[],
+): Map<string, number> {
   let totalBp = 0
   const weights: AllocationWeight[] = shares.map(({ memberId, percentBp }) => {
     if (!Number.isSafeInteger(percentBp)) {
-      throw new ValidationError(`Percentage must be whole basis points, got ${percentBp} for ${memberId}`)
+      throw new ValidationError(
+        `Percentage must be whole basis points, got ${percentBp} for ${memberId}`,
+      )
     }
     if (percentBp < 0) {
-      throw new ValidationError(`Percentage must not be negative: ${percentBp} for ${memberId}`)
+      throw new ValidationError(
+        `Percentage must not be negative: ${percentBp} for ${memberId}`,
+      )
     }
     totalBp += percentBp
     return { memberId, weight: percentBp }
@@ -103,10 +123,15 @@ function splitByPercent(amountCents: number, shares: readonly PercentShare[]): M
   return allocate(amountCents, weights)
 }
 
-function splitByWeight(amountCents: number, shares: readonly WeightedShare[]): Map<string, number> {
+function splitByWeight(
+  amountCents: number,
+  shares: readonly WeightedShare[],
+): Map<string, number> {
   const weights: AllocationWeight[] = shares.map(({ memberId, weight }) => {
     if (!Number.isSafeInteger(weight)) {
-      throw new ValidationError(`Split weight must be a whole number, got ${weight} for ${memberId}`)
+      throw new ValidationError(
+        `Split weight must be a whole number, got ${weight} for ${memberId}`,
+      )
     }
     return { memberId, weight }
   })

@@ -1,9 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { countReferencingExpenses, isMemberReferenced } from '../../../../src/web/features/members/memberUsage.js'
+import {
+  countReferencingExpenses,
+  isMemberReferenced,
+} from '../../../../src/web/features/members/memberUsage.js'
 import type { WireExpense } from '../../../../src/web/net/types.js'
 
-function expense(overrides: Partial<WireExpense> & Pick<WireExpense, 'paidByMemberId' | 'shares'>): WireExpense {
+function expense(
+  overrides: Partial<WireExpense> & Pick<WireExpense, 'paidByMemberId' | 'shares'>,
+): WireExpense {
   return {
     id: 'e1',
     description: 'Dinner',
@@ -22,14 +27,18 @@ describe('isMemberReferenced', () => {
     expect(isMemberReferenced('m1', expenses)).toBe(true)
   })
 
-  it('is true when the member is on an expense\'s shares, even if they did not pay', () => {
-    const expenses = [expense({ paidByMemberId: 'm2', shares: [{ memberId: 'm1', shareCents: 500 }] })]
+  it("is true when the member is on an expense's shares, even if they did not pay", () => {
+    const expenses = [
+      expense({ paidByMemberId: 'm2', shares: [{ memberId: 'm1', shareCents: 500 }] }),
+    ]
 
     expect(isMemberReferenced('m1', expenses)).toBe(true)
   })
 
   it('is false when the member appears in no expense at all', () => {
-    const expenses = [expense({ paidByMemberId: 'm2', shares: [{ memberId: 'm3', shareCents: 500 }] })]
+    const expenses = [
+      expense({ paidByMemberId: 'm2', shares: [{ memberId: 'm3', shareCents: 500 }] }),
+    ]
 
     expect(isMemberReferenced('m1', expenses)).toBe(false)
   })
@@ -41,7 +50,9 @@ describe('isMemberReferenced', () => {
 
 describe('countReferencingExpenses', () => {
   it('counts an expense once even if the member both paid and is in the shares', () => {
-    const expenses = [expense({ paidByMemberId: 'm1', shares: [{ memberId: 'm1', shareCents: 500 }] })]
+    const expenses = [
+      expense({ paidByMemberId: 'm1', shares: [{ memberId: 'm1', shareCents: 500 }] }),
+    ]
 
     expect(countReferencingExpenses('m1', expenses)).toBe(1)
   })
@@ -49,8 +60,16 @@ describe('countReferencingExpenses', () => {
   it('counts across multiple expenses', () => {
     const expenses = [
       expense({ id: 'e1', paidByMemberId: 'm1', shares: [] }),
-      expense({ id: 'e2', paidByMemberId: 'm2', shares: [{ memberId: 'm1', shareCents: 500 }] }),
-      expense({ id: 'e3', paidByMemberId: 'm2', shares: [{ memberId: 'm3', shareCents: 500 }] }),
+      expense({
+        id: 'e2',
+        paidByMemberId: 'm2',
+        shares: [{ memberId: 'm1', shareCents: 500 }],
+      }),
+      expense({
+        id: 'e3',
+        paidByMemberId: 'm2',
+        shares: [{ memberId: 'm3', shareCents: 500 }],
+      }),
     ]
 
     expect(countReferencingExpenses('m1', expenses)).toBe(2)
@@ -60,7 +79,11 @@ describe('countReferencingExpenses', () => {
     const referenced = [expense({ paidByMemberId: 'm1', shares: [] })]
     const unreferenced = [expense({ paidByMemberId: 'm2', shares: [] })]
 
-    expect(countReferencingExpenses('m1', referenced) > 0).toBe(isMemberReferenced('m1', referenced))
-    expect(countReferencingExpenses('m1', unreferenced) > 0).toBe(isMemberReferenced('m1', unreferenced))
+    expect(countReferencingExpenses('m1', referenced) > 0).toBe(
+      isMemberReferenced('m1', referenced),
+    )
+    expect(countReferencingExpenses('m1', unreferenced) > 0).toBe(
+      isMemberReferenced('m1', unreferenced),
+    )
   })
 })

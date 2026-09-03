@@ -15,7 +15,7 @@ describe('parseAmount', () => {
     expect(parseAmount('12.5')).toEqual({ ok: true, cents: 1250 })
   })
 
-  it('rejects an empty string with web-owned copy, not core\'s developer message', () => {
+  it("rejects an empty string with web-owned copy, not core's developer message", () => {
     const result = parseAmount('')
     expect(result.ok).toBe(false)
     if (!result.ok) {
@@ -27,17 +27,26 @@ describe('parseAmount', () => {
   })
 
   it('rejects non-numeric text', () => {
-    expect(parseAmount('abc')).toEqual({ ok: false, message: 'Enter an amount like 12.50' })
+    expect(parseAmount('abc')).toEqual({
+      ok: false,
+      message: 'Enter an amount like 12.50',
+    })
   })
 
   it('rejects more than two decimal places', () => {
-    expect(parseAmount('1.234')).toEqual({ ok: false, message: 'Enter an amount like 12.50' })
+    expect(parseAmount('1.234')).toEqual({
+      ok: false,
+      message: 'Enter an amount like 12.50',
+    })
   })
 
   it('rejects a negative amount, even though core allows negative cents arithmetic', () => {
     // The API's AmountCents schema is min(0) — an expense can't have a
     // negative amount, even though parseAmountToCents itself would parse one.
-    expect(parseAmount('-5')).toEqual({ ok: false, message: 'Enter an amount like 12.50' })
+    expect(parseAmount('-5')).toEqual({
+      ok: false,
+      message: 'Enter an amount like 12.50',
+    })
   })
 
   it('trims surrounding whitespace', () => {

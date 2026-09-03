@@ -11,9 +11,13 @@
 
 import { ZodError } from 'zod'
 import { ValidationError } from '../../core/errors.js'
-import { GroupNotFoundError, GroupNotEmptyError } from '../db/groups.js'
-import { DuplicateMemberError, MemberReferencedError, MemberNotFoundError } from '../db/members.js'
 import { ExpenseNotFoundError, MemberNotInGroupError } from '../db/expenses.js'
+import { GroupNotEmptyError, GroupNotFoundError } from '../db/groups.js'
+import {
+  DuplicateMemberError,
+  MemberNotFoundError,
+  MemberReferencedError,
+} from '../db/members.js'
 
 export interface ErrorBody {
   readonly error: {
@@ -49,7 +53,13 @@ export function toErrorResponse(error: unknown): ErrorResponse {
   if (error instanceof ZodError) {
     return {
       status: 400,
-      body: { error: { code: 'VALIDATION_FAILED', message: 'Request validation failed', issues: error.issues } },
+      body: {
+        error: {
+          code: 'VALIDATION_FAILED',
+          message: 'Request validation failed',
+          issues: error.issues,
+        },
+      },
     }
   }
   if (error instanceof SyntaxError) {
@@ -57,31 +67,60 @@ export function toErrorResponse(error: unknown): ErrorResponse {
     // SyntaxError raised while parsing the client's own request body apart
     // from one raised anywhere else in the codebase for an unrelated reason,
     // so it must carry the same no-leak guarantee as internalErrorResponse.
-    return { status: 400, body: { error: { code: 'MALFORMED_JSON', message: 'Request body is not valid JSON' } } }
+    return {
+      status: 400,
+      body: {
+        error: { code: 'MALFORMED_JSON', message: 'Request body is not valid JSON' },
+      },
+    }
   }
   if (error instanceof GroupNotFoundError) {
-    return { status: 404, body: { error: { code: 'GROUP_NOT_FOUND', message: error.message } } }
+    return {
+      status: 404,
+      body: { error: { code: 'GROUP_NOT_FOUND', message: error.message } },
+    }
   }
   if (error instanceof MemberNotFoundError) {
-    return { status: 404, body: { error: { code: 'MEMBER_NOT_FOUND', message: error.message } } }
+    return {
+      status: 404,
+      body: { error: { code: 'MEMBER_NOT_FOUND', message: error.message } },
+    }
   }
   if (error instanceof ExpenseNotFoundError) {
-    return { status: 404, body: { error: { code: 'EXPENSE_NOT_FOUND', message: error.message } } }
+    return {
+      status: 404,
+      body: { error: { code: 'EXPENSE_NOT_FOUND', message: error.message } },
+    }
   }
   if (error instanceof DuplicateMemberError) {
-    return { status: 409, body: { error: { code: 'DUPLICATE_MEMBER', message: error.message } } }
+    return {
+      status: 409,
+      body: { error: { code: 'DUPLICATE_MEMBER', message: error.message } },
+    }
   }
   if (error instanceof MemberReferencedError) {
-    return { status: 409, body: { error: { code: 'MEMBER_REFERENCED', message: error.message } } }
+    return {
+      status: 409,
+      body: { error: { code: 'MEMBER_REFERENCED', message: error.message } },
+    }
   }
   if (error instanceof GroupNotEmptyError) {
-    return { status: 409, body: { error: { code: 'GROUP_NOT_EMPTY', message: error.message } } }
+    return {
+      status: 409,
+      body: { error: { code: 'GROUP_NOT_EMPTY', message: error.message } },
+    }
   }
   if (error instanceof ValidationError) {
-    return { status: 422, body: { error: { code: 'INVALID_SPLIT', message: error.message } } }
+    return {
+      status: 422,
+      body: { error: { code: 'INVALID_SPLIT', message: error.message } },
+    }
   }
   if (error instanceof MemberNotInGroupError) {
-    return { status: 422, body: { error: { code: 'MEMBER_NOT_IN_GROUP', message: error.message } } }
+    return {
+      status: 422,
+      body: { error: { code: 'MEMBER_NOT_IN_GROUP', message: error.message } },
+    }
   }
   return internalErrorResponse(error)
 }

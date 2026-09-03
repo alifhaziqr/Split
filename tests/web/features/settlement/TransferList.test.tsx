@@ -11,7 +11,9 @@ const MEMBERS: WireMember[] = [
 
 describe('TransferList', () => {
   it('renders each transfer as "X pays Y amount"', () => {
-    const transfers: WireTransfer[] = [{ fromMemberId: 'm2', toMemberId: 'm1', amountCents: 1250 }]
+    const transfers: WireTransfer[] = [
+      { fromMemberId: 'm2', toMemberId: 'm1', amountCents: 1250 },
+    ]
     render(<TransferList transfers={transfers} members={MEMBERS} currency="USD" />)
 
     expect(screen.getByRole('listitem')).toHaveTextContent('Bob pays Ana 12.50 USD')

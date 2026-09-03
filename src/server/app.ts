@@ -31,7 +31,9 @@ export function createApp(db: PrismaClient): Hono {
     return c.json(body, status as ContentfulStatusCode)
   })
 
-  app.notFound((c) => c.json({ error: { code: 'NOT_FOUND', message: 'Route not found' } }, 404))
+  app.notFound((c) =>
+    c.json({ error: { code: 'NOT_FOUND', message: 'Route not found' } }, 404),
+  )
 
   return app
 }

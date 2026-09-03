@@ -28,7 +28,8 @@ export function useDeleteExpense() {
   const client = useApiClient()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (variables: DeleteExpenseVariables) => client.deleteExpense(variables.expenseId),
+    mutationFn: (variables: DeleteExpenseVariables) =>
+      client.deleteExpense(variables.expenseId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: groupKeys.detail(variables.groupId) })
     },

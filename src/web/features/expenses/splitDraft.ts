@@ -16,7 +16,13 @@
  * CLAUDE.md's src/web architecture note: web may freely import core's types.
  */
 
-import type { ExactShare, PercentShare, SplitInput, SplitMode, WeightedShare } from '../../../core/split.js'
+import type {
+  ExactShare,
+  PercentShare,
+  SplitInput,
+  SplitMode,
+  WeightedShare,
+} from '../../../core/split.js'
 import type { WireSplitInput } from '../../net/types.js'
 
 export interface SplitDraft {
@@ -67,23 +73,41 @@ export function toggleParticipant(draft: SplitDraft, memberId: string): SplitDra
   // restores their original position instead of moving them to the end.
   const participantIds = isSelected
     ? draft.participantIds.filter((id) => id !== memberId)
-    : draft.allMemberIds.filter((id) => id === memberId || draft.participantIds.includes(id))
+    : draft.allMemberIds.filter(
+        (id) => id === memberId || draft.participantIds.includes(id),
+      )
   return { ...draft, participantIds }
 }
 
-export function setExactCents(draft: SplitDraft, memberId: string, cents: number): SplitDraft {
+export function setExactCents(
+  draft: SplitDraft,
+  memberId: string,
+  cents: number,
+): SplitDraft {
   return { ...draft, exactCentsById: new Map(draft.exactCentsById).set(memberId, cents) }
 }
 
-export function setPercentBp(draft: SplitDraft, memberId: string, bp: number): SplitDraft {
+export function setPercentBp(
+  draft: SplitDraft,
+  memberId: string,
+  bp: number,
+): SplitDraft {
   return { ...draft, percentBpById: new Map(draft.percentBpById).set(memberId, bp) }
 }
 
-export function setWeight(draft: SplitDraft, memberId: string, weight: number): SplitDraft {
+export function setWeight(
+  draft: SplitDraft,
+  memberId: string,
+  weight: number,
+): SplitDraft {
   return { ...draft, weightById: new Map(draft.weightById).set(memberId, weight) }
 }
 
-function sumBy(ids: readonly string[], byId: ReadonlyMap<string, number>, defaultValue: number): number {
+function sumBy(
+  ids: readonly string[],
+  byId: ReadonlyMap<string, number>,
+  defaultValue: number,
+): number {
   return ids.reduce((sum, id) => sum + (byId.get(id) ?? defaultValue), 0)
 }
 

@@ -239,29 +239,65 @@ describe('money reports caller-input faults as ValidationError', () => {
   // bad input, so it must stay a bare Error (-> 500), never ValidationError.
   const cases: ReadonlyArray<[string, () => unknown, RegExp]> = [
     ['formatCents on a non-integer', () => formatCents(84.5), /integer cents/],
-    ['parseAmountToCents on too much precision', () => parseAmountToCents('1.234'), /1\.234/],
-    ['parseAmountToCents on a non-numeric string', () => parseAmountToCents('twelve'), /twelve/],
-    ['allocate on an empty participant list', () => allocate(100, []), /at least one participant/],
+    [
+      'parseAmountToCents on too much precision',
+      () => parseAmountToCents('1.234'),
+      /1\.234/,
+    ],
+    [
+      'parseAmountToCents on a non-numeric string',
+      () => parseAmountToCents('twelve'),
+      /twelve/,
+    ],
+    [
+      'allocate on an empty participant list',
+      () => allocate(100, []),
+      /at least one participant/,
+    ],
     [
       'allocate on a duplicate member id',
-      () => allocate(100, [{ memberId: 'a', weight: 1 }, { memberId: 'a', weight: 1 }]),
+      () =>
+        allocate(100, [
+          { memberId: 'a', weight: 1 },
+          { memberId: 'a', weight: 1 },
+        ]),
       /duplicate/i,
     ],
     [
       'allocate on a negative weight',
-      () => allocate(100, [{ memberId: 'a', weight: -1 }, { memberId: 'b', weight: 2 }]),
+      () =>
+        allocate(100, [
+          { memberId: 'a', weight: -1 },
+          { memberId: 'b', weight: 2 },
+        ]),
       /weight/,
     ],
     [
       'allocate on all-zero weights',
-      () => allocate(100, [{ memberId: 'a', weight: 0 }, { memberId: 'b', weight: 0 }]),
+      () =>
+        allocate(100, [
+          { memberId: 'a', weight: 0 },
+          { memberId: 'b', weight: 0 },
+        ]),
       /weight/,
     ],
-    ['allocate on a negative total', () => allocate(-100, [{ memberId: 'a', weight: 1 }]), /negative/],
-    ['allocate on a fractional total', () => allocate(10.5, [{ memberId: 'a', weight: 1 }]), /integer cents/],
+    [
+      'allocate on a negative total',
+      () => allocate(-100, [{ memberId: 'a', weight: 1 }]),
+      /negative/,
+    ],
+    [
+      'allocate on a fractional total',
+      () => allocate(10.5, [{ memberId: 'a', weight: 1 }]),
+      /integer cents/,
+    ],
     [
       'allocate on a fractional weight',
-      () => allocate(100, [{ memberId: 'a', weight: 0.5 }, { memberId: 'b', weight: 0.25 }]),
+      () =>
+        allocate(100, [
+          { memberId: 'a', weight: 0.5 },
+          { memberId: 'b', weight: 0.25 },
+        ]),
       /whole number/,
     ],
   ]

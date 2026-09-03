@@ -15,7 +15,9 @@
 
 import { parseAmountToCents } from '../../core/money.js'
 
-export type ParsedAmount = { readonly ok: true; readonly cents: number } | { readonly ok: false; readonly message: string }
+export type ParsedAmount =
+  | { readonly ok: true; readonly cents: number }
+  | { readonly ok: false; readonly message: string }
 
 const INVALID_AMOUNT_MESSAGE = 'Enter an amount like 12.50'
 

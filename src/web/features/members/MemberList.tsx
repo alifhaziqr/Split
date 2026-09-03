@@ -1,8 +1,8 @@
 import { ConfirmButton } from '../../components/ConfirmButton.js'
 import { EmptyState } from '../../components/EmptyState.js'
 import { ErrorBanner } from '../../components/ErrorBanner.js'
-import { useDeleteMember } from '../../queries/members.js'
 import type { WireExpense, WireMember } from '../../net/types.js'
+import { useDeleteMember } from '../../queries/members.js'
 import { countReferencingExpenses, isMemberReferenced } from './memberUsage.js'
 
 /**
@@ -15,7 +15,11 @@ import { countReferencingExpenses, isMemberReferenced } from './memberUsage.js'
  * get attributed to an earlier one. Per-row hooks make that race structurally
  * impossible instead of tracked around.
  */
-function MemberRow(props: { readonly groupId: string; readonly member: WireMember; readonly expenses: readonly WireExpense[] }) {
+function MemberRow(props: {
+  readonly groupId: string
+  readonly member: WireMember
+  readonly expenses: readonly WireExpense[]
+}) {
   const deleteMember = useDeleteMember(props.groupId)
   // Predicts the server's MEMBER_REFERENCED 409 from data already in hand,
   // so the user never fires a delete that can't succeed — see CLAUDE.md's
@@ -58,7 +62,12 @@ export function MemberList(props: {
   return (
     <ul className="space-y-2">
       {props.members.map((member) => (
-        <MemberRow key={member.id} groupId={props.groupId} member={member} expenses={props.expenses} />
+        <MemberRow
+          key={member.id}
+          groupId={props.groupId}
+          member={member}
+          expenses={props.expenses}
+        />
       ))}
     </ul>
   )

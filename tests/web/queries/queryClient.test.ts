@@ -6,7 +6,10 @@ import { createQueryClient } from '../../../src/web/queries/queryClient.js'
 describe('createQueryClient', () => {
   it('never retries a 4xx ApiError — a GROUP_NOT_FOUND should surface after one round trip', () => {
     const client = createQueryClient()
-    const retry = client.getDefaultOptions().queries?.retry as (count: number, error: unknown) => boolean
+    const retry = client.getDefaultOptions().queries?.retry as (
+      count: number,
+      error: unknown,
+    ) => boolean
 
     expect(retry(0, new ApiError(404, 'GROUP_NOT_FOUND', 'gone'))).toBe(false)
     expect(retry(0, new ApiError(409, 'DUPLICATE_MEMBER', 'dup'))).toBe(false)
@@ -14,7 +17,10 @@ describe('createQueryClient', () => {
 
   it('retries a 5xx or network ApiError up to twice', () => {
     const client = createQueryClient()
-    const retry = client.getDefaultOptions().queries?.retry as (count: number, error: unknown) => boolean
+    const retry = client.getDefaultOptions().queries?.retry as (
+      count: number,
+      error: unknown,
+    ) => boolean
 
     expect(retry(0, new ApiError(500, 'INTERNAL_ERROR', 'boom'))).toBe(true)
     expect(retry(1, new ApiError(500, 'INTERNAL_ERROR', 'boom'))).toBe(true)

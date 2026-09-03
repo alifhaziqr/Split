@@ -1,12 +1,15 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-
-import { ApiError } from '../../../src/web/net/apiError.js'
 import { ErrorBanner } from '../../../src/web/components/ErrorBanner.js'
+import { ApiError } from '../../../src/web/net/apiError.js'
 
 describe('ErrorBanner', () => {
   it('renders the mapped copy for a known ApiError code, in a role="alert" region', () => {
-    render(<ErrorBanner error={new ApiError(409, 'DUPLICATE_MEMBER', 'wire message ignored')} />)
+    render(
+      <ErrorBanner
+        error={new ApiError(409, 'DUPLICATE_MEMBER', 'wire message ignored')}
+      />,
+    )
 
     const alert = screen.getByRole('alert')
     expect(alert).toHaveTextContent('Someone in this group already has that name.')

@@ -32,7 +32,10 @@ describe('ExpenseList', () => {
   it('renders each expense in the order given, with description, payer, date and amount', () => {
     const stub = createFetchStub()
     const { Wrapper } = createProvidersWrapper({ fetch: stub.fetch })
-    render(<ExpenseList groupId="g1" expenses={EXPENSES} members={MEMBERS} currency="USD" />, { wrapper: Wrapper })
+    render(
+      <ExpenseList groupId="g1" expenses={EXPENSES} members={MEMBERS} currency="USD" />,
+      { wrapper: Wrapper },
+    )
 
     expect(screen.getByText('Dinner')).toBeInTheDocument()
     const row = screen.getByText('Dinner').closest('li')!
@@ -45,7 +48,10 @@ describe('ExpenseList', () => {
     const stub = createFetchStub()
     const { Wrapper } = createProvidersWrapper({ fetch: stub.fetch })
     const user = userEvent.setup()
-    render(<ExpenseList groupId="g1" expenses={EXPENSES} members={MEMBERS} currency="USD" />, { wrapper: Wrapper })
+    render(
+      <ExpenseList groupId="g1" expenses={EXPENSES} members={MEMBERS} currency="USD" />,
+      { wrapper: Wrapper },
+    )
 
     await user.click(screen.getByRole('button', { name: /details/i }))
 
@@ -57,19 +63,26 @@ describe('ExpenseList', () => {
     stub.queueResponse('DELETE', '/api/expenses/e1', { status: 204 })
     const { Wrapper } = createProvidersWrapper({ fetch: stub.fetch })
     const user = userEvent.setup()
-    render(<ExpenseList groupId="g1" expenses={EXPENSES} members={MEMBERS} currency="USD" />, { wrapper: Wrapper })
+    render(
+      <ExpenseList groupId="g1" expenses={EXPENSES} members={MEMBERS} currency="USD" />,
+      { wrapper: Wrapper },
+    )
 
     const row = screen.getByText('Dinner').closest('li')!
     await user.click(within(row).getByRole('button', { name: 'Delete' }))
     await user.click(within(row).getByRole('button', { name: /sure/i }))
 
-    await waitFor(() => expect(stub.calls[0]).toMatchObject({ method: 'DELETE', path: '/api/expenses/e1' }))
+    await waitFor(() =>
+      expect(stub.calls[0]).toMatchObject({ method: 'DELETE', path: '/api/expenses/e1' }),
+    )
   })
 
   it('renders an empty state when there are no expenses', () => {
     const stub = createFetchStub()
     const { Wrapper } = createProvidersWrapper({ fetch: stub.fetch })
-    render(<ExpenseList groupId="g1" expenses={[]} members={MEMBERS} currency="USD" />, { wrapper: Wrapper })
+    render(<ExpenseList groupId="g1" expenses={[]} members={MEMBERS} currency="USD" />, {
+      wrapper: Wrapper,
+    })
 
     expect(screen.getByText(/no expenses yet/i)).toBeInTheDocument()
   })

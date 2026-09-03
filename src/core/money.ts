@@ -81,10 +81,14 @@ export function allocate(
     // Integer weights keep `totalCents * weight` an exact integer numerator,
     // which is what the largest-remainder proof below depends on.
     if (!Number.isSafeInteger(weight)) {
-      throw new ValidationError(`Allocation weight must be a whole number, got ${weight} for ${memberId}`)
+      throw new ValidationError(
+        `Allocation weight must be a whole number, got ${weight} for ${memberId}`,
+      )
     }
     if (weight < 0) {
-      throw new ValidationError(`Allocation weight must be zero or positive, got ${weight} for ${memberId}`)
+      throw new ValidationError(
+        `Allocation weight must be zero or positive, got ${weight} for ${memberId}`,
+      )
     }
     totalWeight += weight
   }

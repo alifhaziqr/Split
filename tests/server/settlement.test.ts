@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest'
-
-import { splitAmount } from '../../src/core/split.js'
 import type { Transfer } from '../../src/core/settle.js'
-import { settleGroup, toExpenseRecords } from '../../src/server/settlement.js'
+import { splitAmount } from '../../src/core/split.js'
 import type { Balance } from '../../src/server/settlement.js'
+import { settleGroup, toExpenseRecords } from '../../src/server/settlement.js'
 
 // Plain-object stand-ins for GroupDetails and its nested Prisma rows. A unit
 // test for a pure adapter has no business importing generated Prisma types —
@@ -77,7 +76,10 @@ function member(groupId: string, id: string, name: string): FakeMember {
   return { id, groupId, name }
 }
 
-function applyTransfers(balances: readonly Balance[], transfers: readonly Transfer[]): Map<string, number> {
+function applyTransfers(
+  balances: readonly Balance[],
+  transfers: readonly Transfer[],
+): Map<string, number> {
   const settled = new Map(balances.map((b) => [b.memberId, b.balanceCents]))
   for (const { fromMemberId, toMemberId, amountCents } of transfers) {
     settled.set(fromMemberId, (settled.get(fromMemberId) ?? 0) + amountCents)
@@ -107,8 +109,15 @@ describe('settleGroup', () => {
         name: 'Trip',
         currency: 'USD',
         createdAt: new Date(),
-        members: [member('g1', 'a', 'Ana'), member('g1', 'b', 'Bo'), member('g1', 'c', 'Cy')],
-        expenses: [equalExpense('g1', 'a', 900, ['a', 'b', 'c']), equalExpense('g1', 'b', 300, ['a', 'b', 'c'])],
+        members: [
+          member('g1', 'a', 'Ana'),
+          member('g1', 'b', 'Bo'),
+          member('g1', 'c', 'Cy'),
+        ],
+        expenses: [
+          equalExpense('g1', 'a', 900, ['a', 'b', 'c']),
+          equalExpense('g1', 'b', 300, ['a', 'b', 'c']),
+        ],
       },
       {
         id: 'g2',
@@ -150,7 +159,11 @@ describe('settleGroup', () => {
       name: 'Trip',
       currency: 'USD',
       createdAt: new Date(),
-      members: [member('g1', 'a', 'Ana'), member('g1', 'b', 'Bo'), member('g1', 'ghost', 'Ghost')],
+      members: [
+        member('g1', 'a', 'Ana'),
+        member('g1', 'b', 'Bo'),
+        member('g1', 'ghost', 'Ghost'),
+      ],
       expenses: [equalExpense('g1', 'a', 500, ['a', 'b'])],
     }
 
@@ -186,7 +199,11 @@ describe('settleGroup', () => {
   })
 
   it('produces byte-identical output regardless of input array order', () => {
-    const members = [member('g1', 'a', 'Ana'), member('g1', 'b', 'Bo'), member('g1', 'c', 'Cy')]
+    const members = [
+      member('g1', 'a', 'Ana'),
+      member('g1', 'b', 'Bo'),
+      member('g1', 'c', 'Cy'),
+    ]
     const expenses = [
       equalExpense('g1', 'a', 900, ['a', 'b', 'c']),
       equalExpense('g1', 'b', 300, ['a', 'c']),
@@ -209,7 +226,9 @@ describe('settleGroup', () => {
       })),
     }
 
-    expect(JSON.stringify(settleGroup(forward))).toBe(JSON.stringify(settleGroup(reordered)))
+    expect(JSON.stringify(settleGroup(forward))).toBe(
+      JSON.stringify(settleGroup(reordered)),
+    )
   })
 
   it('returns every member at zero with no transfers when a group has no expenses', () => {
@@ -236,7 +255,11 @@ describe('settleGroup', () => {
       name: 'Coffee',
       currency: 'USD',
       createdAt: new Date(),
-      members: [member('g1', 'a', 'Ana'), member('g1', 'b', 'Bo'), member('g1', 'c', 'Cy')],
+      members: [
+        member('g1', 'a', 'Ana'),
+        member('g1', 'b', 'Bo'),
+        member('g1', 'c', 'Cy'),
+      ],
       expenses: [equalExpense('g1', 'a', 100, ['a', 'b', 'c'])],
     }
 
@@ -253,7 +276,11 @@ describe('settleGroup', () => {
       name: 'Trip',
       currency: 'USD',
       createdAt: new Date(),
-      members: [member('g1', 'z', 'Zed'), member('g1', 'a', 'Ana'), member('g1', 'm', 'Mo')],
+      members: [
+        member('g1', 'z', 'Zed'),
+        member('g1', 'a', 'Ana'),
+        member('g1', 'm', 'Mo'),
+      ],
       expenses: [],
     }
 

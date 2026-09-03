@@ -19,8 +19,14 @@ import { GroupNotFoundError } from '../../db/groups.js'
  * confusing "member not in group" error instead of a clean "group not
  * found" for a simple typo'd id.
  */
-export async function requireGroupExists(db: PrismaClient, groupId: string): Promise<void> {
-  const group = await db.group.findUnique({ where: { id: groupId }, select: { id: true } })
+export async function requireGroupExists(
+  db: PrismaClient,
+  groupId: string,
+): Promise<void> {
+  const group = await db.group.findUnique({
+    where: { id: groupId },
+    select: { id: true },
+  })
   if (group === null) {
     throw new GroupNotFoundError(groupId)
   }

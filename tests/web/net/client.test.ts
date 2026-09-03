@@ -4,7 +4,10 @@ import { createApiClient } from '../../../src/web/net/client.js'
 import type { FetchLike } from '../../../src/web/net/http.js'
 
 function jsonResponse(status: number, body: unknown): Response {
-  return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  })
 }
 
 function makeClient(fetchImpl: FetchLike) {
@@ -59,7 +62,9 @@ describe('createApiClient', () => {
   })
 
   it('addMember: POST /api/groups/:groupId/members with the given body', async () => {
-    const fetchMock = vi.fn<FetchLike>(async () => jsonResponse(201, { id: 'm1', name: 'Ana' }))
+    const fetchMock = vi.fn<FetchLike>(async () =>
+      jsonResponse(201, { id: 'm1', name: 'Ana' }),
+    )
     const client = makeClient(fetchMock)
 
     await client.addMember('g1', { name: 'Ana' })
@@ -112,7 +117,9 @@ describe('createApiClient', () => {
   })
 
   it('getSettlement: GET /api/groups/:groupId/settlement', async () => {
-    const fetchMock = vi.fn<FetchLike>(async () => jsonResponse(200, { balances: [], transfers: [] }))
+    const fetchMock = vi.fn<FetchLike>(async () =>
+      jsonResponse(200, { balances: [], transfers: [] }),
+    )
     const client = makeClient(fetchMock)
 
     await client.getSettlement('g1')

@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
 import { Route, Routes } from 'react-router'
+import { describe, expect, it } from 'vitest'
 
 import { AddExpenseForm } from '../../../../src/web/features/expenses/AddExpenseForm.js'
 import type { WireMember } from '../../../../src/web/net/types.js'
@@ -17,7 +17,10 @@ const MEMBERS: WireMember[] = [
 function renderForm(fetch: ReturnType<typeof createFetchStub>['fetch']) {
   return renderWithProviders(
     <Routes>
-      <Route path="/groups/:groupId/expenses/new" element={<AddExpenseForm groupId="g1" members={MEMBERS} />} />
+      <Route
+        path="/groups/:groupId/expenses/new"
+        element={<AddExpenseForm groupId="g1" members={MEMBERS} />}
+      />
       <Route path="/groups/:groupId" element={<div>Group detail page</div>} />
     </Routes>,
     { fetch, initialEntries: ['/groups/g1/expenses/new'] },
@@ -34,7 +37,10 @@ async function fillCommonFields(user: ReturnType<typeof userEvent.setup>) {
 describe('AddExpenseForm', () => {
   it('submits an EQUAL split across every member by default, with the exact POST body', async () => {
     const stub = createFetchStub()
-    stub.queueResponse('POST', '/api/groups/g1/expenses', { status: 201, body: { id: 'e1' } })
+    stub.queueResponse('POST', '/api/groups/g1/expenses', {
+      status: 201,
+      body: { id: 'e1' },
+    })
     const user = userEvent.setup()
     renderForm(stub.fetch)
 

@@ -2,8 +2,8 @@ import { useNavigate } from 'react-router'
 
 import { ConfirmButton } from '../../components/ConfirmButton.js'
 import { ErrorBanner } from '../../components/ErrorBanner.js'
-import { useDeleteGroup } from '../../queries/groups.js'
 import type { WireGroupDetails } from '../../net/types.js'
+import { useDeleteGroup } from '../../queries/groups.js'
 
 export function GroupHeader(props: { readonly group: WireGroupDetails }) {
   const navigate = useNavigate()
@@ -31,12 +31,16 @@ export function GroupHeader(props: { readonly group: WireGroupDetails }) {
           <p className="text-sm text-muted">{group.currency}</p>
         </div>
         <div className="flex flex-col items-start gap-1 sm:items-end">
-          <ConfirmButton onConfirm={handleDelete} disabled={!isEmpty || deleteGroup.isPending}>
+          <ConfirmButton
+            onConfirm={handleDelete}
+            disabled={!isEmpty || deleteGroup.isPending}
+          >
             Delete group
           </ConfirmButton>
           {!isEmpty && (
             <p className="text-sm text-muted">
-              This group still has {group.members.length} members and {group.expenses.length} expenses.
+              This group still has {group.members.length} members and{' '}
+              {group.expenses.length} expenses.
             </p>
           )}
         </div>

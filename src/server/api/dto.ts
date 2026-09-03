@@ -1,5 +1,10 @@
-import type { Expense, ExpenseShare, Group, Member } from '../../generated/prisma/client.js'
 import type { SplitMode } from '../../core/split.js'
+import type {
+  Expense,
+  ExpenseShare,
+  Group,
+  Member,
+} from '../../generated/prisma/client.js'
 import type { GroupDetails } from '../db/groups.js'
 
 export interface MemberDto {
@@ -59,7 +64,9 @@ function toExpenseShareDto(share: ExpenseShare): ExpenseShareDto {
 }
 
 export function toExpenseDto(expense: Expense & { shares: ExpenseShare[] }): ExpenseDto {
-  const sortedShares = [...expense.shares].sort((a, b) => (a.memberId < b.memberId ? -1 : a.memberId > b.memberId ? 1 : 0))
+  const sortedShares = [...expense.shares].sort((a, b) =>
+    a.memberId < b.memberId ? -1 : a.memberId > b.memberId ? 1 : 0,
+  )
 
   return {
     id: expense.id,

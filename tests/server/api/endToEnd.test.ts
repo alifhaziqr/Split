@@ -14,12 +14,11 @@
  */
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-
-import { createApp } from '../../../src/server/app.js'
 import type { ExpenseDto, GroupDto, MemberDto } from '../../../src/server/api/dto.js'
+import { createApp } from '../../../src/server/app.js'
 import type { Settlement } from '../../../src/server/settlement.js'
-import { createTestDatabase, resetDb } from '../db/testDb.js'
 import type { TestDatabase } from '../db/testDb.js'
+import { createTestDatabase, resetDb } from '../db/testDb.js'
 import { createHttpClient, readError, readJson } from './httpTestHelpers.js'
 
 let ctx: TestDatabase
@@ -150,7 +149,9 @@ describe('end-to-end: seeded group of four, five mixed-mode expenses, settle-up,
 
     // Hard case: 100 cents three ways is 34/33/33, never 33/33/33 — assert
     // directly on this expense's own response body, right after creating it.
-    const oddShares = oddSplitExpense.shares.map((s) => s.shareCents).sort((a, b) => b - a)
+    const oddShares = oddSplitExpense.shares
+      .map((s) => s.shareCents)
+      .sort((a, b) => b - a)
     expect(oddShares).toEqual([34, 33, 33])
     expect(oddSplitExpense.shares.reduce((sum, s) => sum + s.shareCents, 0)).toBe(100)
 
@@ -181,8 +182,14 @@ describe('end-to-end: seeded group of four, five mixed-mode expenses, settle-up,
     for (const transfer of settlement.transfers) {
       expect(transfer.amountCents).toBeGreaterThan(0)
       expect(transfer.fromMemberId).not.toBe(transfer.toMemberId)
-      running.set(transfer.fromMemberId, (running.get(transfer.fromMemberId) ?? 0) + transfer.amountCents)
-      running.set(transfer.toMemberId, (running.get(transfer.toMemberId) ?? 0) - transfer.amountCents)
+      running.set(
+        transfer.fromMemberId,
+        (running.get(transfer.fromMemberId) ?? 0) + transfer.amountCents,
+      )
+      running.set(
+        transfer.toMemberId,
+        (running.get(transfer.toMemberId) ?? 0) - transfer.amountCents,
+      )
     }
     expect(running.size).toBe(4)
     for (const balance of running.values()) {
@@ -190,7 +197,13 @@ describe('end-to-end: seeded group of four, five mixed-mode expenses, settle-up,
     }
 
     // 6. Dismantle the group in the only order the foreign keys permit.
-    const allExpenses = [equalExpense, exactExpense, percentExpense, sharesExpense, oddSplitExpense]
+    const allExpenses = [
+      equalExpense,
+      exactExpense,
+      percentExpense,
+      sharesExpense,
+      oddSplitExpense,
+    ]
     const allMembers = [ana, bo, cy, dee]
 
     const earlyDeleteRes = await del(`/api/groups/${group.id}`)

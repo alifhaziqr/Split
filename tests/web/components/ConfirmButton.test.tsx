@@ -8,9 +8,7 @@ describe('ConfirmButton', () => {
   it('does not call onConfirm on the first click — asks for confirmation instead', async () => {
     const onConfirm = vi.fn()
     const user = userEvent.setup()
-    render(
-      <ConfirmButton onConfirm={onConfirm}>Remove</ConfirmButton>,
-    )
+    render(<ConfirmButton onConfirm={onConfirm}>Remove</ConfirmButton>)
 
     await user.click(screen.getByRole('button', { name: 'Remove' }))
 
@@ -21,9 +19,7 @@ describe('ConfirmButton', () => {
   it('calls onConfirm on the second click', async () => {
     const onConfirm = vi.fn()
     const user = userEvent.setup()
-    render(
-      <ConfirmButton onConfirm={onConfirm}>Remove</ConfirmButton>,
-    )
+    render(<ConfirmButton onConfirm={onConfirm}>Remove</ConfirmButton>)
 
     await user.click(screen.getByRole('button', { name: 'Remove' }))
     await user.click(screen.getByRole('button', { name: /sure/i }))
@@ -34,9 +30,7 @@ describe('ConfirmButton', () => {
   it('resets to the initial label after confirming, rather than staying armed', async () => {
     const onConfirm = vi.fn()
     const user = userEvent.setup()
-    render(
-      <ConfirmButton onConfirm={onConfirm}>Remove</ConfirmButton>,
-    )
+    render(<ConfirmButton onConfirm={onConfirm}>Remove</ConfirmButton>)
 
     await user.click(screen.getByRole('button', { name: 'Remove' }))
     await user.click(screen.getByRole('button', { name: /sure/i }))

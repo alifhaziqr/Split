@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
 import { Route, Routes } from 'react-router'
+import { describe, expect, it } from 'vitest'
 
 import { AddExpensePage } from '../../../src/web/pages/AddExpensePage.js'
 import { createFetchStub } from '../fetchStub.js'
@@ -44,7 +44,10 @@ describe('AddExpensePage', () => {
   it('navigates back to the group detail route on a successful submit', async () => {
     const stub = createFetchStub()
     stub.queueResponse('GET', '/api/groups/g1', { status: 200, body: GROUP_DETAILS })
-    stub.queueResponse('POST', '/api/groups/g1/expenses', { status: 201, body: { id: 'e1' } })
+    stub.queueResponse('POST', '/api/groups/g1/expenses', {
+      status: 201,
+      body: { id: 'e1' },
+    })
     const user = userEvent.setup()
     renderPage(stub.fetch)
 

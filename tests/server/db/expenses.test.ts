@@ -1,15 +1,14 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-
-import { createGroup } from '../../../src/server/db/groups.js'
-import { addMember } from '../../../src/server/db/members.js'
 import {
   createExpense,
   deleteExpense,
   ExpenseNotFoundError,
   MemberNotInGroupError,
 } from '../../../src/server/db/expenses.js'
-import { createTestDatabase, resetDb } from './testDb.js'
+import { createGroup } from '../../../src/server/db/groups.js'
+import { addMember } from '../../../src/server/db/members.js'
 import type { TestDatabase } from './testDb.js'
+import { createTestDatabase, resetDb } from './testDb.js'
 
 let ctx: TestDatabase
 
@@ -192,7 +191,9 @@ describe('deleteExpense', () => {
 
     await deleteExpense(ctx.db, first.id)
 
-    const remainingShares = await ctx.db.expenseShare.findMany({ where: { expenseId: second.id } })
+    const remainingShares = await ctx.db.expenseShare.findMany({
+      where: { expenseId: second.id },
+    })
     expect(remainingShares).toHaveLength(second.shares.length)
     expect(await ctx.db.expense.findUnique({ where: { id: second.id } })).not.toBeNull()
   })

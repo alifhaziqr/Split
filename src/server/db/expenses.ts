@@ -1,7 +1,11 @@
-import { splitAmount } from '../../core/split.js'
 import type { SplitInput } from '../../core/split.js'
+import { splitAmount } from '../../core/split.js'
+import type {
+  Expense,
+  ExpenseShare,
+  PrismaClient,
+} from '../../generated/prisma/client.js'
 import { Prisma } from '../../generated/prisma/client.js'
-import type { Expense, ExpenseShare, PrismaClient } from '../../generated/prisma/client.js'
 import { foreignKeyViolationKind } from './prismaErrors.js'
 
 export interface CreateExpenseInput {
@@ -61,7 +65,10 @@ async function findMissingMemberId(
  * stale client-side member id from a different group would otherwise write
  * silently and corrupt both groups' balances with no error anywhere.
  */
-export async function createExpense(db: PrismaClient, input: CreateExpenseInput): Promise<ExpenseWithShares> {
+export async function createExpense(
+  db: PrismaClient,
+  input: CreateExpenseInput,
+): Promise<ExpenseWithShares> {
   const shares = splitAmount(input.amountCents, input.split)
   const memberIds = new Set([input.paidByMemberId, ...shares.keys()])
 

@@ -68,7 +68,11 @@ describe('toExpenseDto', () => {
 
     const dto = toExpenseDto(expense)
 
-    expect(dto.shares.map(share => share.memberId)).toEqual(['member-a', 'member-b', 'member-c'])
+    expect(dto.shares.map((share) => share.memberId)).toEqual([
+      'member-a',
+      'member-b',
+      'member-c',
+    ])
     expect(dto.shares).toEqual([
       { memberId: 'member-a', shareCents: 1000 },
       { memberId: 'member-b', shareCents: 1000 },
@@ -96,8 +100,18 @@ describe('toGroupDetailsDto', () => {
           splitMode: 'EQUAL' as const,
           createdAt: new Date('2026-01-01T00:00:00.000Z'),
           shares: [
-            { id: 'share-1b', expenseId: 'expense-early', memberId: 'member-2', shareCents: 500 },
-            { id: 'share-1a', expenseId: 'expense-early', memberId: 'member-1', shareCents: 500 },
+            {
+              id: 'share-1b',
+              expenseId: 'expense-early',
+              memberId: 'member-2',
+              shareCents: 500,
+            },
+            {
+              id: 'share-1a',
+              expenseId: 'expense-early',
+              memberId: 'member-1',
+              shareCents: 500,
+            },
           ],
         },
         {
@@ -110,8 +124,18 @@ describe('toGroupDetailsDto', () => {
           splitMode: 'EQUAL' as const,
           createdAt: new Date('2026-02-01T00:00:00.000Z'),
           shares: [
-            { id: 'share-2b', expenseId: 'expense-late', memberId: 'member-2', shareCents: 1000 },
-            { id: 'share-2a', expenseId: 'expense-late', memberId: 'member-1', shareCents: 1000 },
+            {
+              id: 'share-2b',
+              expenseId: 'expense-late',
+              memberId: 'member-2',
+              shareCents: 1000,
+            },
+            {
+              id: 'share-2a',
+              expenseId: 'expense-late',
+              memberId: 'member-1',
+              shareCents: 1000,
+            },
           ],
         },
       ],
@@ -119,10 +143,19 @@ describe('toGroupDetailsDto', () => {
 
     const dto = toGroupDetailsDto(details)
 
-    expect(dto.members.map(member => member.name)).toEqual(['Ana', 'Bob', 'Charlie'])
-    expect(dto.expenses.map(expense => expense.id)).toEqual(['expense-late', 'expense-early'])
-    expect(dto.expenses[0]?.shares.map(share => share.memberId)).toEqual(['member-1', 'member-2'])
-    expect(dto.expenses[1]?.shares.map(share => share.memberId)).toEqual(['member-1', 'member-2'])
+    expect(dto.members.map((member) => member.name)).toEqual(['Ana', 'Bob', 'Charlie'])
+    expect(dto.expenses.map((expense) => expense.id)).toEqual([
+      'expense-late',
+      'expense-early',
+    ])
+    expect(dto.expenses[0]?.shares.map((share) => share.memberId)).toEqual([
+      'member-1',
+      'member-2',
+    ])
+    expect(dto.expenses[1]?.shares.map((share) => share.memberId)).toEqual([
+      'member-1',
+      'member-2',
+    ])
   })
 
   it('produces byte-identical JSON for the same logical data listed in a different input order', () => {
@@ -147,8 +180,18 @@ describe('toGroupDetailsDto', () => {
       splitMode: 'EQUAL' as const,
       createdAt: new Date('2026-01-01T00:00:00.000Z'),
       shares: [
-        { id: 'share-1b', expenseId: 'expense-early', memberId: 'member-2', shareCents: 500 },
-        { id: 'share-1a', expenseId: 'expense-early', memberId: 'member-1', shareCents: 500 },
+        {
+          id: 'share-1b',
+          expenseId: 'expense-early',
+          memberId: 'member-2',
+          shareCents: 500,
+        },
+        {
+          id: 'share-1a',
+          expenseId: 'expense-early',
+          memberId: 'member-1',
+          shareCents: 500,
+        },
       ],
     }
     const expenseLate = {
@@ -161,15 +204,33 @@ describe('toGroupDetailsDto', () => {
       splitMode: 'EQUAL' as const,
       createdAt: new Date('2026-02-01T00:00:00.000Z'),
       shares: [
-        { id: 'share-2a', expenseId: 'expense-late', memberId: 'member-1', shareCents: 1000 },
-        { id: 'share-2b', expenseId: 'expense-late', memberId: 'member-2', shareCents: 1000 },
+        {
+          id: 'share-2a',
+          expenseId: 'expense-late',
+          memberId: 'member-1',
+          shareCents: 1000,
+        },
+        {
+          id: 'share-2b',
+          expenseId: 'expense-late',
+          memberId: 'member-2',
+          shareCents: 1000,
+        },
       ],
     }
 
-    const detailsA = buildGroupDetails({ members: membersA, expenses: [expenseEarly, expenseLate] })
-    const detailsB = buildGroupDetails({ members: membersB, expenses: [expenseLate, expenseEarly] })
+    const detailsA = buildGroupDetails({
+      members: membersA,
+      expenses: [expenseEarly, expenseLate],
+    })
+    const detailsB = buildGroupDetails({
+      members: membersB,
+      expenses: [expenseLate, expenseEarly],
+    })
 
-    expect(JSON.stringify(toGroupDetailsDto(detailsA))).toBe(JSON.stringify(toGroupDetailsDto(detailsB)))
+    expect(JSON.stringify(toGroupDetailsDto(detailsA))).toBe(
+      JSON.stringify(toGroupDetailsDto(detailsB)),
+    )
   })
 
   it('breaks ties on identical expense dates by ordering ids ascending', () => {
@@ -204,7 +265,7 @@ describe('toGroupDetailsDto', () => {
 
     const dto = toGroupDetailsDto(details)
 
-    expect(dto.expenses.map(expense => expense.id)).toEqual(['expense-a', 'expense-z'])
+    expect(dto.expenses.map((expense) => expense.id)).toEqual(['expense-a', 'expense-z'])
   })
 
   it('converts every Date field to a string that round-trips to the same instant', () => {
@@ -238,6 +299,8 @@ describe('toGroupDetailsDto', () => {
 
     expect(new Date(dto.createdAt).getTime()).toBe(groupCreatedAt.getTime())
     expect(new Date(dto.expenses[0]?.date ?? '').getTime()).toBe(expenseDate.getTime())
-    expect(new Date(dto.expenses[0]?.createdAt ?? '').getTime()).toBe(expenseCreatedAt.getTime())
+    expect(new Date(dto.expenses[0]?.createdAt ?? '').getTime()).toBe(
+      expenseCreatedAt.getTime(),
+    )
   })
 })

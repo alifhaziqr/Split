@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
 import { MemoryRouter } from 'react-router'
+import { describe, expect, it } from 'vitest'
 
 import { GroupList } from '../../../../src/web/features/groups/GroupList.js'
 import type { WireGroup } from '../../../../src/web/net/types.js'
@@ -11,7 +11,7 @@ const GROUPS: WireGroup[] = [
 ]
 
 describe('GroupList', () => {
-  it('renders a link to each group\'s detail page', () => {
+  it("renders a link to each group's detail page", () => {
     render(
       <MemoryRouter>
         <GroupList groups={GROUPS} />

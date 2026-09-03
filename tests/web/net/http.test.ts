@@ -1,11 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
-
-import { createRequest } from '../../../src/web/net/http.js'
 import { ApiError } from '../../../src/web/net/apiError.js'
 import type { FetchLike } from '../../../src/web/net/http.js'
+import { createRequest } from '../../../src/web/net/http.js'
 
 function jsonResponse(status: number, body: unknown): Response {
-  return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  })
 }
 
 describe('createRequest', () => {
@@ -20,7 +22,9 @@ describe('createRequest', () => {
     expect(url).toBe('/api/groups')
     expect(init.method).toBe('GET')
     expect(init.body).toBeUndefined()
-    expect((init.headers as Record<string, string> | undefined)?.['content-type']).toBeUndefined()
+    expect(
+      (init.headers as Record<string, string> | undefined)?.['content-type'],
+    ).toBeUndefined()
   })
 
   it('serializes a body and sets Content-Type on a POST', async () => {
@@ -32,7 +36,9 @@ describe('createRequest', () => {
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
     expect(init.method).toBe('POST')
     expect(init.body).toBe(JSON.stringify({ name: 'Trip', currency: 'USD' }))
-    expect((init.headers as Record<string, string>)['content-type']).toBe('application/json')
+    expect((init.headers as Record<string, string>)['content-type']).toBe(
+      'application/json',
+    )
   })
 
   it('resolves a 200 JSON response to the parsed body', async () => {
@@ -55,11 +61,15 @@ describe('createRequest', () => {
 
   it('throws an ApiError built from a conforming {error:{code,message}} body', async () => {
     const fetchMock = vi.fn<FetchLike>(async () =>
-      jsonResponse(409, { error: { code: 'DUPLICATE_MEMBER', message: 'Ana already exists' } }),
+      jsonResponse(409, {
+        error: { code: 'DUPLICATE_MEMBER', message: 'Ana already exists' },
+      }),
     )
     const request = createRequest(fetchMock)
 
-    await expect(request('POST', '/api/groups/g1/members', { name: 'Ana' })).rejects.toMatchObject({
+    await expect(
+      request('POST', '/api/groups/g1/members', { name: 'Ana' }),
+    ).rejects.toMatchObject({
       status: 409,
       code: 'DUPLICATE_MEMBER',
       message: 'Ana already exists',
@@ -70,15 +80,22 @@ describe('createRequest', () => {
     // The module's own header comment promises "ApiError thrown on any
     // failure" — a route that unexpectedly returns a non-JSON 200 body
     // must not leak a raw parse exception past that contract.
-    const fetchMock = vi.fn<FetchLike>(async () => new Response('not json', { status: 200 }))
+    const fetchMock = vi.fn<FetchLike>(
+      async () => new Response('not json', { status: 200 }),
+    )
     const request = createRequest(fetchMock)
 
-    await expect(request('GET', '/api/groups')).rejects.toMatchObject({ status: 200, code: 'INTERNAL_ERROR' })
+    await expect(request('GET', '/api/groups')).rejects.toMatchObject({
+      status: 200,
+      code: 'INTERNAL_ERROR',
+    })
   })
 
   it('throws an INTERNAL_ERROR ApiError when a non-2xx body does not match the error shape', async () => {
     // e.g. a proxy's own HTML 502, not anything toErrorResponse produced.
-    const fetchMock = vi.fn<FetchLike>(async () => new Response('<html>Bad Gateway</html>', { status: 502 }))
+    const fetchMock = vi.fn<FetchLike>(
+      async () => new Response('<html>Bad Gateway</html>', { status: 502 }),
+    )
     const request = createRequest(fetchMock)
 
     await expect(request('GET', '/api/groups')).rejects.toMatchObject({

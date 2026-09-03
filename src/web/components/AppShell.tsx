@@ -13,7 +13,10 @@ export function AppShell(props: { readonly children: ReactNode }) {
     <div className="min-h-screen">
       <header className="sticky top-0 z-10 border-b border-subtle bg-surface">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-          <Link to="/" className="text-lg font-semibold text-fg no-underline hover:no-underline">
+          <Link
+            to="/"
+            className="text-lg font-semibold text-fg no-underline hover:no-underline"
+          >
             Split
           </Link>
           <Link to="/" className="text-sm font-medium text-muted hover:text-fg">

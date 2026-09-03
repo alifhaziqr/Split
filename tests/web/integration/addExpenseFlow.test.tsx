@@ -16,12 +16,11 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-
-import { App } from '../../../src/web/App.js'
 import { createApp } from '../../../src/server/app.js'
+import { App } from '../../../src/web/App.js'
 import type { FetchLike } from '../../../src/web/net/http.js'
-import { createTestDatabase, resetDb } from '../../server/db/testDb.js'
 import type { TestDatabase } from '../../server/db/testDb.js'
+import { createTestDatabase, resetDb } from '../../server/db/testDb.js'
 import { createProvidersWrapper } from '../renderWithProviders.js'
 
 let ctx: TestDatabase
@@ -42,7 +41,10 @@ beforeEach(async () => {
 
 function renderAppAgainstRealServer() {
   const fetchViaApp: FetchLike = async (input, init) => app.request(input as string, init)
-  const { Wrapper } = createProvidersWrapper({ fetch: fetchViaApp, initialEntries: ['/'] })
+  const { Wrapper } = createProvidersWrapper({
+    fetch: fetchViaApp,
+    initialEntries: ['/'],
+  })
   return render(<App />, { wrapper: Wrapper })
 }
 
@@ -55,7 +57,9 @@ describe('add-expense flow, end to end', () => {
     await user.type(screen.getByLabelText(/name/i), 'Trip')
     await user.type(screen.getByLabelText(/currency/i), 'USD')
     await user.click(screen.getByRole('button', { name: /create group/i }))
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'Trip' })).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Trip' })).toBeInTheDocument(),
+    )
 
     // 2. Add three members.
     for (const name of ['Ana', 'Bob', 'Cy']) {
@@ -93,7 +97,9 @@ describe('add-expense flow, end to end', () => {
     // toHaveTextContent concatenates all descendant text (Money renders its
     // amount in a nested <span>), so scoping to the settle-up section and
     // asserting substrings avoids needing a unique getByText match.
-    const settleSection = screen.getByRole('heading', { name: 'Settle up' }).closest('section')
+    const settleSection = screen
+      .getByRole('heading', { name: 'Settle up' })
+      .closest('section')
     await waitFor(() => expect(settleSection).toHaveTextContent('Cy pays Ana 4.00 USD'))
     expect(settleSection).toHaveTextContent('Bob pays Ana 1.00 USD')
     // And the balances list agrees before any transfer is applied.

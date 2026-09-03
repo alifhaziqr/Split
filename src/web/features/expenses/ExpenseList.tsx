@@ -1,6 +1,6 @@
 import { EmptyState } from '../../components/EmptyState.js'
-import { useDeleteExpense } from '../../queries/expenses.js'
 import type { WireExpense, WireMember } from '../../net/types.js'
+import { useDeleteExpense } from '../../queries/expenses.js'
 import { ExpenseRow } from './ExpenseRow.js'
 
 export function ExpenseList(props: {
@@ -25,7 +25,9 @@ export function ExpenseList(props: {
           expense={expense}
           members={props.members}
           currency={props.currency}
-          onDelete={() => deleteExpense.mutate({ expenseId: expense.id, groupId: props.groupId })}
+          onDelete={() =>
+            deleteExpense.mutate({ expenseId: expense.id, groupId: props.groupId })
+          }
         />
       ))}
     </ul>

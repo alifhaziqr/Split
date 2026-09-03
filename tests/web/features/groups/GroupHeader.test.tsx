@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
 import { Route, Routes } from 'react-router'
+import { describe, expect, it } from 'vitest'
 
 import { GroupHeader } from '../../../../src/web/features/groups/GroupHeader.js'
 import type { WireGroupDetails } from '../../../../src/web/net/types.js'
@@ -23,7 +23,10 @@ const NON_EMPTY_GROUP: WireGroupDetails = {
   expenses: [],
 }
 
-function renderHeader(group: WireGroupDetails, fetch: ReturnType<typeof createFetchStub>['fetch']) {
+function renderHeader(
+  group: WireGroupDetails,
+  fetch: ReturnType<typeof createFetchStub>['fetch'],
+) {
   return renderWithProviders(
     <Routes>
       <Route path="/" element={<div>Home page</div>} />

@@ -16,7 +16,11 @@ import { ApiError } from './apiError.js'
 export type FetchLike = typeof globalThis.fetch
 
 interface WireErrorBody {
-  readonly error: { readonly code: string; readonly message: string; readonly issues?: unknown }
+  readonly error: {
+    readonly code: string
+    readonly message: string
+    readonly issues?: unknown
+  }
 }
 
 /** True only for the exact `{error:{code,message}}` shape errors.ts always produces. */
@@ -37,7 +41,12 @@ async function toApiError(response: Response): Promise<ApiError> {
   }
 
   if (isWireErrorBody(body)) {
-    return new ApiError(response.status, body.error.code, body.error.message, body.error.issues)
+    return new ApiError(
+      response.status,
+      body.error.code,
+      body.error.message,
+      body.error.issues,
+    )
   }
 
   // Not a body toErrorResponse produced — a proxy's own error page, an empty
@@ -47,14 +56,21 @@ async function toApiError(response: Response): Promise<ApiError> {
 }
 
 export function createRequest(fetchImpl: FetchLike) {
-  return async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  return async function request<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+  ): Promise<T> {
     let response: Response
     try {
       response = await fetchImpl(path, {
         method,
         // Never send a body (or a Content-Type header) on a GET/DELETE with
         // nothing to serialize.
-        ...(body !== undefined && { headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }),
+        ...(body !== undefined && {
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        }),
       })
     } catch {
       // fetch itself rejected: offline, DNS, a blocked request. status 0 is
@@ -78,7 +94,11 @@ export function createRequest(fetchImpl: FetchLike) {
       // A 2xx with a non-JSON body is a server bug, not a client error —
       // but this module's contract is "ApiError thrown on any failure", so
       // even that must not leak a raw SyntaxError past it.
-      throw new ApiError(response.status, 'INTERNAL_ERROR', 'An unexpected error occurred')
+      throw new ApiError(
+        response.status,
+        'INTERNAL_ERROR',
+        'An unexpected error occurred',
+      )
     }
   }
 }

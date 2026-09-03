@@ -42,7 +42,10 @@ describe('splitStatus — EQUAL', () => {
 
     const status = splitStatus(draft, 1000)
 
-    expect(status).toEqual({ kind: 'ok', input: { mode: 'EQUAL', memberIds: MEMBER_IDS } })
+    expect(status).toEqual({
+      kind: 'ok',
+      input: { mode: 'EQUAL', memberIds: MEMBER_IDS },
+    })
   })
 })
 
@@ -53,7 +56,10 @@ describe('splitStatus — EXACT', () => {
     draft = setExactCents(draft, 'm2', 300)
     // m3 left unset — treated as 0 owed, contributing to the remainder.
 
-    expect(splitStatus(draft, 1000)).toEqual({ kind: 'exact-unbalanced', remainingCents: 400 })
+    expect(splitStatus(draft, 1000)).toEqual({
+      kind: 'exact-unbalanced',
+      remainingCents: 400,
+    })
   })
 
   it('reports a negative remainder when shares sum over the amount', () => {
@@ -62,7 +68,10 @@ describe('splitStatus — EXACT', () => {
     draft = setExactCents(draft, 'm2', 600)
     draft = setExactCents(draft, 'm3', 0)
 
-    expect(splitStatus(draft, 1000)).toEqual({ kind: 'exact-unbalanced', remainingCents: -200 })
+    expect(splitStatus(draft, 1000)).toEqual({
+      kind: 'exact-unbalanced',
+      remainingCents: -200,
+    })
   })
 
   it('is ok once shares sum exactly to the amount', () => {
@@ -108,7 +117,10 @@ describe('splitStatus — PERCENT', () => {
     draft = setPercentBp(draft, 'm2', 3333)
     draft = setPercentBp(draft, 'm3', 0)
 
-    expect(splitStatus(draft, 1000)).toEqual({ kind: 'percent-unbalanced', remainingBp: 3334 })
+    expect(splitStatus(draft, 1000)).toEqual({
+      kind: 'percent-unbalanced',
+      remainingBp: 3334,
+    })
   })
 
   it('is ok once basis points sum exactly to 10000', () => {
@@ -224,7 +236,7 @@ describe('mode and participant state stay independent', () => {
 })
 
 describe('toWireSplitInput', () => {
-  it('converts core\'s readonly SplitInput arrays into the mutable arrays the wire body needs', () => {
+  it("converts core's readonly SplitInput arrays into the mutable arrays the wire body needs", () => {
     let draft = setMode(createInitialDraft(MEMBER_IDS), 'EXACT')
     draft = setExactCents(draft, 'm1', 500)
     draft = setExactCents(draft, 'm2', 300)
@@ -251,10 +263,19 @@ describe('toWireSplitInput', () => {
     const equal = toWireSplitInput({ mode: 'EQUAL', memberIds: ['m1', 'm2'] })
     expect(equal).toEqual({ mode: 'EQUAL', memberIds: ['m1', 'm2'] })
 
-    const percent = toWireSplitInput({ mode: 'PERCENT', shares: [{ memberId: 'm1', percentBp: 10000 }] })
-    expect(percent).toEqual({ mode: 'PERCENT', shares: [{ memberId: 'm1', percentBp: 10000 }] })
+    const percent = toWireSplitInput({
+      mode: 'PERCENT',
+      shares: [{ memberId: 'm1', percentBp: 10000 }],
+    })
+    expect(percent).toEqual({
+      mode: 'PERCENT',
+      shares: [{ memberId: 'm1', percentBp: 10000 }],
+    })
 
-    const shares = toWireSplitInput({ mode: 'SHARES', shares: [{ memberId: 'm1', weight: 2 }] })
+    const shares = toWireSplitInput({
+      mode: 'SHARES',
+      shares: [{ memberId: 'm1', weight: 2 }],
+    })
     expect(shares).toEqual({ mode: 'SHARES', shares: [{ memberId: 'm1', weight: 2 }] })
   })
 })
@@ -263,10 +284,18 @@ describe('invariant: any ok draft produces a SplitInput core actually accepts', 
   it('EQUAL, EXACT, PERCENT and SHARES drafts all pass splitAmount and sum to the amount', () => {
     const amountCents = 1000
 
-    let equalDraft = createInitialDraft(MEMBER_IDS)
-    let exactDraft = setExactCents(setExactCents(setExactCents(setMode(equalDraft, 'EXACT'), 'm1', 334), 'm2', 333), 'm3', 333)
-    let percentDraft = setPercentBp(setPercentBp(setPercentBp(setMode(equalDraft, 'PERCENT'), 'm1', 3334), 'm2', 3333), 'm3', 3333)
-    let sharesDraft = setMode(equalDraft, 'SHARES')
+    const equalDraft = createInitialDraft(MEMBER_IDS)
+    const exactDraft = setExactCents(
+      setExactCents(setExactCents(setMode(equalDraft, 'EXACT'), 'm1', 334), 'm2', 333),
+      'm3',
+      333,
+    )
+    const percentDraft = setPercentBp(
+      setPercentBp(setPercentBp(setMode(equalDraft, 'PERCENT'), 'm1', 3334), 'm2', 3333),
+      'm3',
+      3333,
+    )
+    const sharesDraft = setMode(equalDraft, 'SHARES')
 
     for (const draft of [equalDraft, exactDraft, percentDraft, sharesDraft]) {
       const status = splitStatus(draft, amountCents)

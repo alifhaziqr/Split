@@ -79,8 +79,14 @@ export interface AddMemberBody {
 // array is still assignable wherever core's SplitInput is expected.
 export type WireSplitInput =
   | { readonly mode: 'EQUAL'; readonly memberIds: string[] }
-  | { readonly mode: 'EXACT'; readonly shares: { memberId: string; shareCents: number }[] }
-  | { readonly mode: 'PERCENT'; readonly shares: { memberId: string; percentBp: number }[] }
+  | {
+      readonly mode: 'EXACT'
+      readonly shares: { memberId: string; shareCents: number }[]
+    }
+  | {
+      readonly mode: 'PERCENT'
+      readonly shares: { memberId: string; percentBp: number }[]
+    }
   | { readonly mode: 'SHARES'; readonly shares: { memberId: string; weight: number }[] }
 
 // Mirrors z.input<typeof CreateExpenseSchema>: `date` is the string the

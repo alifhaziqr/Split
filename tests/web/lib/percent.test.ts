@@ -12,11 +12,17 @@ describe('parsePercentToBp', () => {
   })
 
   it('rejects invalid text with web-owned copy', () => {
-    expect(parsePercentToBp('abc')).toEqual({ ok: false, message: 'Enter a percentage like 33.33' })
+    expect(parsePercentToBp('abc')).toEqual({
+      ok: false,
+      message: 'Enter a percentage like 33.33',
+    })
   })
 
   it('rejects a negative percentage', () => {
-    expect(parsePercentToBp('-5')).toEqual({ ok: false, message: 'Enter a percentage like 33.33' })
+    expect(parsePercentToBp('-5')).toEqual({
+      ok: false,
+      message: 'Enter a percentage like 33.33',
+    })
   })
 
   it('never throws for any string input', () => {

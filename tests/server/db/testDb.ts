@@ -8,9 +8,8 @@ import { execFileSync } from 'node:child_process'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-
-import { createDbClient } from '../../../src/server/db/client.js'
 import type { PrismaClient } from '../../../src/generated/prisma/client.js'
+import { createDbClient } from '../../../src/server/db/client.js'
 
 export interface TestDatabase {
   db: PrismaClient

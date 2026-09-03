@@ -1,7 +1,13 @@
 import { Hono } from 'hono'
 
 import type { PrismaClient } from '../../../generated/prisma/client.js'
-import { createGroup, deleteGroup, getGroupWithDetails, GroupNotFoundError, listGroups } from '../../db/groups.js'
+import {
+  createGroup,
+  deleteGroup,
+  GroupNotFoundError,
+  getGroupWithDetails,
+  listGroups,
+} from '../../db/groups.js'
 import { toGroupDetailsDto, toGroupDto } from '../dto.js'
 import { CreateGroupSchema } from '../schemas.js'
 import { requireParam } from './shared.js'

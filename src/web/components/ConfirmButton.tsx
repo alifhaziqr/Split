@@ -6,8 +6,8 @@
  * fire on some unrelated later click.
  */
 
-import { useState } from 'react'
 import type { ReactNode } from 'react'
+import { useState } from 'react'
 
 import { cn } from '../lib/cn.js'
 

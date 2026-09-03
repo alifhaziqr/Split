@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 
 import type { PrismaClient } from '../../../generated/prisma/client.js'
-import { getGroupWithDetails, GroupNotFoundError } from '../../db/groups.js'
+import { GroupNotFoundError, getGroupWithDetails } from '../../db/groups.js'
 import { settleGroup } from '../../settlement.js'
 import { requireParam } from './shared.js'
 
