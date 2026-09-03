@@ -24,6 +24,7 @@ jobs:
       # postinstall runs `prisma generate`; src/generated/prisma is gitignored,
       # so this must precede typecheck or tsc fails on missing generated types.
       - run: npm ci
+      - run: npm run lint
       - run: npm run typecheck
       - run: npm test
       - run: npm run build:web

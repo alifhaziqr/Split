@@ -17,6 +17,8 @@ First run only:
 
     npm test           # vitest, single run
     npm run test:watch # vitest, watch mode
+    npm run lint        # biome check --error-on-warnings (lint + format check)
+    npm run lint:fix    # biome check --write (safe autofixes + reformat)
     npm run typecheck  # tsc --noEmit
     npm run dev        # tsx-watched Hono dev server (src/server/index.ts)
     npm run dev:web     # Vite dev server for the React client (src/web), proxies /api to :3000
@@ -161,10 +163,24 @@ Tests live in `tests/`, mirroring `src/`. For `src/core`, tests are written *bef
 implementation. Prefer invariant tests — balances sum to zero, shares sum to the total — over
 example-by-example assertions.
 
-**CI (`.github/workflows/ci.yml`) runs `typecheck`, `test`, then `build:web`** on every push
-to `main` and every PR, on the Node version pinned in `.nvmrc`. It needs no `DATABASE_URL`
-secret — `prisma.config.ts`'s fallback to `file:./dev.db` covers `npm ci`/`prisma generate`,
-and `testDb.ts` injects its own per-run URL for every temp database.
+**CI (`.github/workflows/ci.yml`) runs `lint`, `typecheck`, `test`, then `build:web`** on
+every push to `main` and every PR, on the Node version pinned in `.nvmrc`. It needs no
+`DATABASE_URL` secret — `prisma.config.ts`'s fallback to `file:./dev.db` covers
+`npm ci`/`prisma generate`, and `testDb.ts` injects its own per-run URL for every temp
+database.
+
+**Lint/format is Biome, not ESLint** — `typescript-eslint`'s peer range tops out below the
+installed `typescript@7`, while Biome parses TypeScript itself with no `typescript`
+dependency at all, so the TS version can't break it. `biome.jsonc` (not `.json`: Biome's
+config loader silently falls back to hardcoded defaults — double quotes, semicolons, tabs —
+on a `.json` file containing `//` comments, with no warning, so the comments explaining the
+`tests/**` `noNonNullAssertion` override need the `.jsonc` extension to survive) matches the
+repo's existing style (single quotes, no semicolons, 90-char width) rather than reformatting
+to Biome's defaults. `npm run lint` passes `--error-on-warnings`: several rules this project
+cares about (`noExplicitAny`) are warning-severity under Biome's `recommended` preset, and
+plain `biome check` exits 0 on warnings alone. `*.css` is excluded — Biome's CSS parser
+doesn't understand Tailwind v4's `@theme`/`@apply` at-rules, the same reason
+`vitest.config.ts` doesn't mirror `@tailwindcss/vite` into the web test project.
 
 **DB tests run the real migration.** `tests/server/db/testDb.ts` creates a temp SQLite file per
 test file and runs the actual `prisma migrate deploy` against it, so tests prove the committed
@@ -258,7 +274,8 @@ scope for this one — don't propose closing them unless asked.
 ## Status
 
 Done through **M6**: `core` (money/split/settle), the Prisma-backed REST API, the React
-client, and a Tailwind visual pass. 390 tests; `npm test` and `npm run typecheck` both green.
-Published at `github.com/alifhaziqr/Split`, with GitHub Actions CI on push/PR.
+client, and a Tailwind visual pass. 390 tests; `npm test`, `npm run typecheck`, and
+`npm run lint` all green. Published at `github.com/alifhaziqr/Split`, with GitHub Actions
+CI (lint, typecheck, test, build) on push/PR.
 
 **Next** — not yet decided.
