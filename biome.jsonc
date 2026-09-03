@@ -1,0 +1,61 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.11/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": false,
+    // package-lock.json is npm-owned generated output — reformatting it is
+    // pure diff noise. .claude/ is Claude Code's own tool config, not app
+    // code. Neither is covered by .gitignore (both are tracked). *.css is
+    // excluded because Biome's CSS parser doesn't understand Tailwind v4's
+    // @theme/@apply at-rules yet — same reason vitest.config.ts doesn't
+    // mirror @tailwindcss/vite into the web test project (see its header
+    // comment): no tool in this repo is expected to understand this CSS.
+    "includes": ["**", "!package-lock.json", "!.claude", "!**/*.css"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 90
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "asNeeded"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended"
+    }
+  },
+  "overrides": [
+    {
+      // `!` on a DOM query result (`.closest('li')!`, `getAllByRole(...)[0]!`)
+      // is a standard RTL test idiom: a genuine null there fails the very
+      // next line with a clear stack trace, unlike production code hiding a
+      // real nullable path. src/ carries none of these — only tests/ does.
+      "includes": ["tests/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noNonNullAssertion": "off"
+          }
+        }
+      }
+    }
+  ],
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
+}
